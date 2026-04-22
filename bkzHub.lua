@@ -1,19 +1,19 @@
 -- ================================================
 --  ADMIN MENU V8 | lopine06 | Touche B pour ouvrir
 -- ================================================
-task.defer(function()  -- defer = attend que Roblox soit prêt
+spawn(function()  -- Remplacement de task.defer par spawn pour la compatibilité
+    
+    local UIS = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+    local Players = game:GetService("Players")
+    local Lighting = game:GetService("Lighting")
+    local TweenService = game:GetService("TweenService")
+    local Debris = game:GetService("Debris")
+    local HttpService = game:GetService("HttpService")
 
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService")
-local Debris = game:GetService("Debris")
-local HttpService = game:GetService("HttpService")
-
-local player = Players.LocalPlayer
-local mouse = player:GetMouse()
-local playerGui = player:WaitForChild("PlayerGui")
+    local player = Players.LocalPlayer
+    local mouse = player:GetMouse()
+    local playerGui = player:WaitForChild("PlayerGui")
 
 if playerGui:FindFirstChild("AdminMenu") then playerGui.AdminMenu:Destroy() end
 
