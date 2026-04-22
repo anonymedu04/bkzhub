@@ -1218,7 +1218,8 @@ end)
 -- Brouillard
 createSection(pages.World, "🌫  Météo")
 
--- Atmosphère partagée (Roblox utilise Atmosphere, pas FogEffect)
+createSection(pages.World, "🌫  Météo & Effets")
+
 local function getAtmo()
 	local a = Lighting:FindFirstChildOfClass("Atmosphere")
 	if not a then a = Instance.new("Atmosphere", Lighting) end
@@ -1227,99 +1228,94 @@ end
 
 createToggle(pages.World, "🌫  Brouillard dense", 5, function(state)
 	local atmo = getAtmo()
-	if state then
-		TweenService:Create(atmo, TweenInfo.new(1.5), {Density = 0.8, Offset = 0.1, Color = Color3.fromRGB(180,180,190)}):Play()
-	else
-		TweenService:Create(atmo, TweenInfo.new(1.5), {Density = 0.3, Offset = 0}):Play()
-	end
+	TweenService:Create(atmo, TweenInfo.new(1.5), {
+		Density = state and 0.85 or 0.3,
+		Offset  = state and 0.1  or 0,
+	}):Play()
 end)
 
 createToggle(pages.World, "☁  Brouillard léger", 6, function(state)
 	local atmo = getAtmo()
-	if state then
-		TweenService:Create(atmo, TweenInfo.new(1.5), {Density = 0.5, Offset = 0}):Play()
-	else
-		TweenService:Create(atmo, TweenInfo.new(1.5), {Density = 0.3, Offset = 0}):Play()
-	end
+	TweenService:Create(atmo, TweenInfo.new(1.5), {
+		Density = state and 0.5 or 0.3,
+	}):Play()
 end)
 
+-- Pluie : ParticleEmitter via rbxassetid connu + son ambiance
 createToggle(pages.World, "🌧  Pluie", 7, function(state)
-	if state then
-		-- Part ancrée invisible portant le ParticleEmitter
-		local rain = Instance.new("Part", workspace)
-		rain.Name = "AdminRain"; rain.Anchored = true
-		rain.CanCollide = false; rain.CastShadow = false
-		rain.Transparency = 1; rain.Size = Vector3.new(1,1,1)
-		local ps = Instance.new("ParticleEmitter", rain)
-		-- Texture de goutte (rbxassetid officiel Roblox)
-		ps.Texture   = "rbxasset://textures/particles/rain.png"
-		ps.Rate      = 600
-		ps.Lifetime  = NumberRange.new(1.2, 2)
-		ps.Speed     = NumberRange.new(60, 80)
-		ps.SpreadAngle = Vector2.new(2, 2)
-		ps.Size = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.04),
-			NumberSequenceKeypoint.new(1, 0.04),
-		})
-		ps.Color = ColorSequence.new(Color3.fromRGB(160, 200, 255))
-		ps.Rotation  = NumberRange.new(90, 90)
-		ps.RotSpeed  = NumberRange.new(0, 0)
-		ps.LightEmission = 0
-		ps.VelocityInheritance = 0
-		-- Son pluie
-		local sndRain = Instance.new("Sound", rain)
-		sndRain.SoundId = "rbxassetid://130768997" -- pluie ambiance
-		sndRain.Volume = 0.6; sndRain.Looped = true
-		sndRain:Play()
-		-- Suit le joueur
-		RunService:BindToRenderStep("AdminRain", 1, function()
-			local c = player.Character
-			if c and c:FindFirstChild("HumanoidRootPart") then
-				rain.CFrame = CFrame.new(c.HumanoidRootPart.Position + Vector3.new(0, 35, 0))
-			end
-		end)
-	else
-		RunService:UnbindFromRenderStep("AdminRain")
-		local r = workspace:FindFirstChild("AdminRain")
-		if r then r:Destroy() end
-	end
+	RunService:UnbindFromRenderStep("AdminRain")
+	local old = workspace:FindFirstChild("AdminRain")
+	if old then old:Destroy() end
+	if not state then return end
+
+	local rain = Instance.new("Part", workspace)
+	rain.Name = "AdminRain"; rain.Anchored = true
+	rain.CanCollide = false; rain.Transparency = 1
+	rain.Size = Vector3.new(300, 1, 300)
+
+	local ps = Instance.new("ParticleEmitter", rain)
+	ps.Texture      = "rbxassetid://3125510843"   -- goutte de pluie
+	ps.Rate         = 800
+	ps.Lifetime     = NumberRange.new(0.8, 1.4)
+	ps.Speed        = NumberRange.new(80, 100)
+	ps.SpreadAngle  = Vector2.new(3, 3)
+	ps.Size         = NumberSequence.new(0.06)
+	ps.Color        = ColorSequence.new(Color3.fromRGB(180, 210, 255))
+	ps.Rotation     = NumberRange.new(90, 90)
+	ps.RotSpeed     = NumberRange.new(0, 0)
+	ps.LightEmission = 0
+
+	local snd = Instance.new("Sound", rain)
+	snd.SoundId = "rbxassetid://1660819739"   -- ambiance pluie
+	snd.Volume = 0.7; snd.Looped = true; snd:Play()
+
+	RunService:BindToRenderStep("AdminRain", 1, function()
+		local c = player.Character
+		if c and c:FindFirstChild("HumanoidRootPart") then
+			rain.CFrame = CFrame.new(c.HumanoidRootPart.Position + Vector3.new(0, 40, 0))
+		end
+	end)
 end)
 
+-- Neige : une seule instance, texture correcte
 createToggle(pages.World, "❄  Neige", 8, function(state)
+	RunService:UnbindFromRenderStep("AdminSnow")
+	local old = workspace:FindFirstChild("AdminSnow")
+	if old then old:Destroy() end
+
 	if state then
 		local snow = Instance.new("Part", workspace)
 		snow.Name = "AdminSnow"; snow.Anchored = true
-		snow.CanCollide = false; snow.CastShadow = false
-		snow.Transparency = 1; snow.Size = Vector3.new(1,1,1)
+		snow.CanCollide = false; snow.Transparency = 1
+		snow.Size = Vector3.new(200, 1, 200)
+
 		local ps = Instance.new("ParticleEmitter", snow)
-		ps.Texture   = "rbxasset://textures/particles/snowflake.png"
-		ps.Rate      = 250
-		ps.Lifetime  = NumberRange.new(3, 5)
-		ps.Speed     = NumberRange.new(8, 18)
-		ps.SpreadAngle = Vector2.new(20, 20)
-		ps.Size = NumberSequence.new({
-			NumberSequenceKeypoint.new(0, 0.2),
+		ps.Texture      = "rbxassetid://2344870656"   -- flocon de neige
+		ps.Rate         = 300
+		ps.Lifetime     = NumberRange.new(3, 5)
+		ps.Speed        = NumberRange.new(10, 20)
+		ps.SpreadAngle  = Vector2.new(25, 25)
+		ps.Size         = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.25),
 			NumberSequenceKeypoint.new(1, 0.05),
 		})
-		ps.Color     = ColorSequence.new(Color3.fromRGB(220, 235, 255))
-		ps.Rotation  = NumberRange.new(0, 360)
-		ps.RotSpeed  = NumberRange.new(-40, 40)
-		ps.LightEmission = 0.3
-		-- Ambiance froide
+		ps.Color        = ColorSequence.new(Color3.fromRGB(220, 235, 255))
+		ps.Rotation     = NumberRange.new(0, 360)
+		ps.RotSpeed     = NumberRange.new(-30, 30)
+		ps.LightEmission = 0.2
+
 		TweenService:Create(Lighting, TweenInfo.new(2), {
 			Ambient = Color3.fromRGB(160, 180, 210),
 			OutdoorAmbient = Color3.fromRGB(180, 200, 230),
 		}):Play()
+
 		RunService:BindToRenderStep("AdminSnow", 1, function()
 			local c = player.Character
 			if c and c:FindFirstChild("HumanoidRootPart") then
-				snow.CFrame = CFrame.new(c.HumanoidRootPart.Position + Vector3.new(0, 28, 0))
+				snow.CFrame = CFrame.new(c.HumanoidRootPart.Position + Vector3.new(0, 30, 0))
 			end
 		end)
 	else
-		RunService:UnbindFromRenderStep("AdminSnow")
-		local s = workspace:FindFirstChild("AdminSnow")
-		if s then s:Destroy() end
 		TweenService:Create(Lighting, TweenInfo.new(1.5), {
 			Ambient = Color3.fromRGB(100,100,100),
 			OutdoorAmbient = Color3.fromRGB(128,128,128),
@@ -1327,56 +1323,15 @@ createToggle(pages.World, "❄  Neige", 8, function(state)
 	end
 end)
 
-createSection(pages.World, "⏩  Temps")
-
-createSlider(pages.World, "⏩  Vitesse du temps (x)", 0, 5, 1, 12, function(val)
-	Lighting.ClockTime = Lighting.ClockTime -- reset
-	game:GetService("Lighting"):SetAttribute("AdminTimeSpeed", val)
-	-- Loop
-	RunService:UnbindFromRenderStep("AdminTimeSpeed")
-	if val > 0 then
-		RunService:BindToRenderStep("AdminTimeSpeed", 1, function(dt)
-			Lighting.ClockTime = (Lighting.ClockTime + dt * val) % 24
-		end)
-	end
-end)
-
-createToggle(pages.World, "❄  Neige", 13, function(state)
-	if state then
-		local snow = Instance.new("Part", workspace)
-		snow.Name = "AdminSnow"; snow.Anchored = true
-		snow.CanCollide = false; snow.Transparency = 1
-		snow.Size = Vector3.new(1,1,1)
-		local ps = Instance.new("ParticleEmitter", snow)
-		ps.Texture = "rbxassetid://241685484"
-		ps.Rate = 200; ps.Lifetime = NumberRange.new(3, 5)
-		ps.Speed = NumberRange.new(10, 20)
-		ps.SpreadAngle = Vector2.new(15, 15)
-		ps.Size = NumberSequence.new({NumberSequenceKeypoint.new(0,0.15), NumberSequenceKeypoint.new(1,0.05)})
-		ps.Color = ColorSequence.new(Color3.fromRGB(220, 235, 255))
-		ps.Rotation = NumberRange.new(0, 360); ps.RotSpeed = NumberRange.new(-30, 30)
-		RunService:BindToRenderStep("AdminSnow", 1, function()
-			local c = player.Character
-			if c and c:FindFirstChild("HumanoidRootPart") then
-				snow.CFrame = CFrame.new(c.HumanoidRootPart.Position + Vector3.new(0, 25, 0))
-			end
-		end)
-	else
-		RunService:UnbindFromRenderStep("AdminSnow")
-		local s = workspace:FindFirstChild("AdminSnow"); if s then s:Destroy() end
-	end
-end)
-
-createToggle(pages.World, "🌅  Coucher de soleil rouge", 14, function(state)
+createToggle(pages.World, "🌅  Coucher de soleil", 9, function(state)
 	if state then
 		TweenService:Create(Lighting, TweenInfo.new(2), {
-			ClockTime = 18,
-			Brightness = 1.2,
-			Ambient = Color3.fromRGB(80, 30, 10),
-			OutdoorAmbient = Color3.fromRGB(180, 80, 30),
+			ClockTime = 18, Brightness = 1.2,
+			Ambient = Color3.fromRGB(80,30,10),
+			OutdoorAmbient = Color3.fromRGB(180,80,30),
 		}):Play()
 		shader.Enabled = true
-		shader.TintColor = Color3.fromRGB(255, 180, 120)
+		shader.TintColor = Color3.fromRGB(255,180,120)
 		shader.Saturation = 0.3
 	else
 		shader.Enabled = false
@@ -1388,22 +1343,36 @@ createToggle(pages.World, "🌅  Coucher de soleil rouge", 14, function(state)
 	end
 end)
 
-createSlider(pages.World, "🌍  Gravité", 0, 300, 196, 8, function(val)
-	workspace.Gravity = val
+createSection(pages.World, "⏩  Temps")
+
+createSlider(pages.World, "☀  Heure du jour", 0, 24, 14, 10, function(val)
+	Lighting.ClockTime = val
 end)
 
-createBtn(pages.World, "🌍  Reset gravité", currentTheme.Button, 9, function()
+createSlider(pages.World, "⏩  Vitesse du temps (x)", 0, 5, 0, 11, function(val)
+	RunService:UnbindFromRenderStep("AdminTimeSpeed")
+	if val > 0 then
+		RunService:BindToRenderStep("AdminTimeSpeed", 1, function(dt)
+			Lighting.ClockTime = (Lighting.ClockTime + dt * val) % 24
+		end)
+	end
+end)
+
+createSection(pages.World, "⚙  Physique")
+
+createSlider(pages.World, "🌍  Gravité", 0, 300, 196, 12, function(val)
+	workspace.Gravity = val
+end)
+createBtn(pages.World, "↩  Reset gravité", currentTheme.Button, 13, function()
 	workspace.Gravity = 196
 end)
 
 createSection(pages.World, "🖥  Performance")
 
-createBtn(pages.World, "🔓  Unlock FPS", currentTheme.Button, 10, function()
-	if setfpscap then
-		RunService:BindToRenderStep("FPSUnlock", 1, function() setfpscap(0) end)
-	end
+createBtn(pages.World, "🔓  Unlock FPS", currentTheme.Button, 14, function()
+	if setfpscap then RunService:BindToRenderStep("FPSUnlock",1,function() setfpscap(0) end) end
 end)
-createBtn(pages.World, "🔒  Reset FPS (60)", currentTheme.Button, 11, function()
+createBtn(pages.World, "🔒  Reset FPS (60)", currentTheme.Button, 15, function()
 	RunService:UnbindFromRenderStep("FPSUnlock")
 	if setfpscap then setfpscap(60) end
 end)
@@ -1735,11 +1704,16 @@ local function startNuke()
 	bv.Velocity = Vector3.new(0, 200, 0)
 	bv.MaxForce = Vector3.new(0, 1e6, 0)
 
-	-- Son fusée
+	-- Sons fusée (2 couches pour un effet plus puissant)
 	local snd = Instance.new("Sound", hrp)
 	snd.Name = "NukeSound"
-	snd.SoundId = "rbxassetid://6042053626"
-	snd.Volume = 3; snd.Looped = true; snd:Play()
+	snd.SoundId = "rbxassetid://5801257793"   -- rocket puissant
+	snd.Volume = 4; snd.Looped = true; snd:Play()
+
+	local sndBoost = Instance.new("Sound", hrp)
+	sndBoost.Name = "NukeBoost"
+	sndBoost.SoundId = "rbxassetid://144578244"  -- thruster grave
+	sndBoost.Volume = 2.5; sndBoost.Looped = true; sndBoost:Play()
 
 	-- Traînée de feu
 	nukeConn = RunService.Heartbeat:Connect(function()
@@ -1772,6 +1746,7 @@ local function stopNuke()
 	if hrp then
 		local bv = hrp:FindFirstChild("NukeBV"); if bv then bv:Destroy() end
 		local snd = hrp:FindFirstChild("NukeSound"); if snd then snd:Destroy() end
+		local sndB = hrp:FindFirstChild("NukeBoost"); if sndB then sndB:Destroy() end
 	end
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if hum then hum:ChangeState(Enum.HumanoidStateType.Freefall) end
@@ -1795,15 +1770,17 @@ createBtn(pages.Perso, "💣  Explosion sur place", currentTheme.Danger, 11, fun
 	local hrp  = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
-	-- Son d'explosion (rbxasset officiel Roblox)
-	local boom = Instance.new("Sound", hrp)
-	boom.SoundId  = "rbxassetid://2248511717"
-	boom.Volume   = 5
-	boom.RollOffMaxDistance = 300
-	boom:Play()
-	game:GetService("Debris"):AddItem(boom, 4)
+	-- Son d'explosion immédiat (2 couches : impact + basse)
+	local boom1 = Instance.new("Sound", hrp)
+	boom1.SoundId = "rbxassetid://2248511717"; boom1.Volume = 5
+	boom1.RollOffMaxDistance = 300; boom1:Play()
+	Debris:AddItem(boom1, 4)
 
-	-- FX explosion
+	local boom2 = Instance.new("Sound", hrp)
+	boom2.SoundId = "rbxassetid://3716468774"; boom2.Volume = 3  -- basse explosion
+	boom2.RollOffMaxDistance = 200; boom2:Play()
+	Debris:AddItem(boom2, 3)
+
 	spawnExplosionFX(hrp.Position)
 
 	-- Tuer le perso (via Humanoid)
@@ -2088,15 +2065,120 @@ end
 
 -- ================================================
 
--- toggle ESP helper
 local function toggleESP(key, state)
 	espState[key] = state
 	refreshAllESP()
 end
 
+-- Helper dropdown couleur ESP
+local function createColorDropdown(parent, label, order, defaultColor, onChange)
+	local colors = {
+		{"Rouge",  Color3.fromRGB(255,60,60)},
+		{"Orange", Color3.fromRGB(255,140,30)},
+		{"Jaune",  Color3.fromRGB(255,220,50)},
+		{"Vert",   Color3.fromRGB(50,220,100)},
+		{"Cyan",   Color3.fromRGB(0,210,255)},
+		{"Bleu",   Color3.fromRGB(80,160,255)},
+		{"Violet", Color3.fromRGB(180,80,255)},
+		{"Blanc",  Color3.fromRGB(240,240,240)},
+		{"Rose",   Color3.fromRGB(255,100,180)},
+	}
+	local selected = defaultColor
+	local open = false
+
+	-- Bouton principal
+	local headerF = Instance.new("Frame", parent)
+	headerF.Size = UDim2.new(1,0,0,34)
+	headerF.BackgroundColor3 = currentTheme.Button
+	headerF.BorderSizePixel = 0
+	headerF.LayoutOrder = order
+	Instance.new("UICorner", headerF).CornerRadius = UDim.new(0,8)
+
+	local swatch = Instance.new("Frame", headerF)
+	swatch.Size = UDim2.new(0,14,0,14)
+	swatch.Position = UDim2.new(0,10,0.5,-7)
+	swatch.BackgroundColor3 = selected
+	swatch.BorderSizePixel = 0
+	Instance.new("UICorner", swatch).CornerRadius = UDim.new(1,0)
+
+	local lbl = Instance.new("TextLabel", headerF)
+	lbl.Size = UDim2.new(1,-60,1,0)
+	lbl.Position = UDim2.new(0,30,0,0)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = label
+	lbl.TextColor3 = currentTheme.Text
+	lbl.Font = Enum.Font.Gotham; lbl.TextSize = 12
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local arrow = Instance.new("TextLabel", headerF)
+	arrow.Size = UDim2.new(0,24,1,0)
+	arrow.Position = UDim2.new(1,-28,0,0)
+	arrow.BackgroundTransparency = 1
+	arrow.Text = "▾"; arrow.TextColor3 = currentTheme.SubText
+	arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 13
+
+	-- Liste déroulante
+	local listF = Instance.new("Frame", parent)
+	listF.Size = UDim2.new(1,0,0,0)
+	listF.BackgroundColor3 = currentTheme.Panel
+	listF.BorderSizePixel = 0
+	listF.ClipsDescendants = true
+	listF.LayoutOrder = order
+	Instance.new("UICorner", listF).CornerRadius = UDim.new(0,8)
+	local ll = Instance.new("UIListLayout", listF)
+	ll.Padding = UDim.new(0,2)
+
+	for _, pair in ipairs(colors) do
+		local cname, cval = pair[1], pair[2]
+		local row = Instance.new("TextButton", listF)
+		row.Size = UDim2.new(1,0,0,28)
+		row.BackgroundTransparency = 1
+		row.Text = ""
+		row.BorderSizePixel = 0
+
+		local dot = Instance.new("Frame", row)
+		dot.Size = UDim2.new(0,12,0,12)
+		dot.Position = UDim2.new(0,10,0.5,-6)
+		dot.BackgroundColor3 = cval
+		dot.BorderSizePixel = 0
+		Instance.new("UICorner", dot).CornerRadius = UDim.new(1,0)
+
+		local rl = Instance.new("TextLabel", row)
+		rl.Size = UDim2.new(1,-30,1,0)
+		rl.Position = UDim2.new(0,28,0,0)
+		rl.BackgroundTransparency = 1
+		rl.Text = cname
+		rl.TextColor3 = currentTheme.Text
+		rl.Font = Enum.Font.Gotham; rl.TextSize = 11
+		rl.TextXAlignment = Enum.TextXAlignment.Left
+
+		row.MouseEnter:Connect(function() row.BackgroundTransparency = 0.8 end)
+		row.MouseLeave:Connect(function() row.BackgroundTransparency = 1 end)
+		row.MouseButton1Click:Connect(function()
+			selected = cval
+			swatch.BackgroundColor3 = cval
+			onChange(cval)
+			open = false
+			TweenService:Create(listF, TweenInfo.new(0.15), {Size=UDim2.new(1,0,0,0)}):Play()
+			task.wait(0.15); listF.Visible = false
+		end)
+	end
+
+	local headerBtn = Instance.new("TextButton", headerF)
+	headerBtn.Size = UDim2.new(1,0,1,0)
+	headerBtn.BackgroundTransparency = 1
+	headerBtn.Text = ""
+	headerBtn.MouseButton1Click:Connect(function()
+		open = not open
+		listF.Visible = true
+		local h = open and (#colors * 30 + 4) or 0
+		TweenService:Create(listF, TweenInfo.new(0.15), {Size=UDim2.new(1,0,0,h)}):Play()
+		if not open then task.wait(0.15); listF.Visible = false end
+	end)
+end
 
 -- UI ESP dans pages.ESP
-createSection(pages.ESP, "Rapide")
+createSection(pages.ESP, "⚡  Raccourcis")
 createBtn(pages.ESP, "⚡  Tout activer", currentTheme.Accent, 0, function()
 	for k in pairs(espState) do espState[k] = true end
 	refreshAllESP()
@@ -2106,32 +2188,29 @@ createBtn(pages.ESP, "❌  Tout désactiver", currentTheme.Danger, 1, function()
 	for _, p in ipairs(Players:GetPlayers()) do clearESPFor(p) end
 end)
 
-createSection(pages.ESP, "Joueurs")
-createToggle(pages.ESP, "📦  Boxes (SelectionBox)", 2, function(s) toggleESP("boxes", s) end)
-createToggle(pages.ESP, "🏷  Noms", 3, function(s) toggleESP("names", s) end)
-createToggle(pages.ESP, "❤  Santé", 4, function(s) toggleESP("health", s) end)
-createToggle(pages.ESP, "📏  Distance", 5, function(s) toggleESP("distance", s) end)
-createToggle(pages.ESP, "🎮  Niveau de santé (barre)", 6, function(s) toggleESP("healthBar", s) end)
+createSection(pages.ESP, "👤  Affichage joueurs")
+createToggle(pages.ESP, "📦  Boxes", 2, function(s) toggleESP("boxes", s) end)
+createToggle(pages.ESP, "🏷  Noms + tag équipe", 3, function(s) toggleESP("names", s) end)
+createToggle(pages.ESP, "❤  Santé (texte)", 4, function(s) toggleESP("health", s) end)
+createToggle(pages.ESP, "📊  Barre de santé", 5, function(s) toggleESP("healthBar", s) end)
+createToggle(pages.ESP, "📏  Distance", 6, function(s) toggleESP("distance", s) end)
 
-createSection(pages.ESP, "Visuel avancé")
-createToggle(pages.ESP, "🎯  Tracers (dot)", 7, function(s) toggleESP("tracers", s) end)
-createToggle(pages.ESP, "🔴  Head Dots", 8, function(s) toggleESP("headDots", s) end)
-createToggle(pages.ESP, "💀  Squelette (Beams)", 9, function(s) toggleESP("skeletons", s) end)
-createToggle(pages.ESP, "🔆  Chams (Highlight)", 10, function(s) toggleESP("chams", s) end)
-createToggle(pages.ESP, "🔫  Snaplines (centre écran)", 11, function(s) toggleESP("snaplines", s) end)
+createSection(pages.ESP, "🎨  Visuel avancé")
+createToggle(pages.ESP, "🔴  Head Dots", 7, function(s) toggleESP("headDots", s) end)
+createToggle(pages.ESP, "💀  Squelette", 8, function(s) toggleESP("skeletons", s) end)
+createToggle(pages.ESP, "🔆  Chams (Highlight)", 9, function(s) toggleESP("chams", s) end)
+createToggle(pages.ESP, "🎯  Tracers", 10, function(s) toggleESP("tracers", s) end)
+createToggle(pages.ESP, "🔫  Snaplines", 11, function(s) toggleESP("snaplines", s) end)
 
-createSection(pages.ESP, "Couleurs  —  🔴 Ennemis")
-createBtn(pages.ESP, "🔴  Rouge",   currentTheme.Danger,  12, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,60,60);  refreshAllESP() end)
-createBtn(pages.ESP, "🟠  Orange",  currentTheme.Warn,    13, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,140,30); refreshAllESP() end)
-createBtn(pages.ESP, "🟡  Jaune",   currentTheme.Warn,    14, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,220,50); refreshAllESP() end)
-createBtn(pages.ESP, "🟣  Violet",  currentTheme.Button,  15, function() ESP_COLOR_ENEMY = Color3.fromRGB(180,80,255); refreshAllESP() end)
-createBtn(pages.ESP, "⬜  Blanc",   currentTheme.Button,  16, function() ESP_COLOR_ENEMY = Color3.fromRGB(240,240,240); refreshAllESP() end)
-
-createSection(pages.ESP, "Couleurs  —  🔵 Alliés")
-createBtn(pages.ESP, "🔵  Bleu",    currentTheme.Button,  17, function() ESP_COLOR_ALLY = Color3.fromRGB(80,160,255);  refreshAllESP() end)
-createBtn(pages.ESP, "🟢  Vert",    currentTheme.Success, 18, function() ESP_COLOR_ALLY = Color3.fromRGB(50,220,100);  refreshAllESP() end)
-createBtn(pages.ESP, "🩵  Cyan",    currentTheme.Button,  19, function() ESP_COLOR_ALLY = Color3.fromRGB(0,210,255);   refreshAllESP() end)
-createBtn(pages.ESP, "🟤  Or",      currentTheme.Warn,    20, function() ESP_COLOR_ALLY = Color3.fromRGB(255,200,50);  refreshAllESP() end)
+createSection(pages.ESP, "🎨  Couleurs")
+createColorDropdown(pages.ESP, "🔴  Couleur Ennemis", 20,
+	Color3.fromRGB(255,60,60),
+	function(c) ESP_COLOR_ENEMY = c; refreshAllESP() end
+)
+createColorDropdown(pages.ESP, "🔵  Couleur Alliés", 21,
+	Color3.fromRGB(80,160,255),
+	function(c) ESP_COLOR_ALLY = c; refreshAllESP() end
+)
 
 -- PAGE AUTRE — Crédits
 -- ================================================
