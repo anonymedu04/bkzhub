@@ -1,19 +1,19 @@
 -- ================================================
 --  ADMIN MENU V8 | lopine06 | Touche B pour ouvrir
 -- ================================================
-spawn(function()  -- Remplacement de task.defer par spawn pour la compatibilité
-    
-    local UIS = game:GetService("UserInputService")
-    local RunService = game:GetService("RunService")
-    local Players = game:GetService("Players")
-    local Lighting = game:GetService("Lighting")
-    local TweenService = game:GetService("TweenService")
-    local Debris = game:GetService("Debris")
-    local HttpService = game:GetService("HttpService")
+task.defer(function()  -- defer = attend que Roblox soit prêt
 
-    local player = Players.LocalPlayer
-    local mouse = player:GetMouse()
-    local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+local HttpService = game:GetService("HttpService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+local playerGui = player:WaitForChild("PlayerGui")
 
 if playerGui:FindFirstChild("AdminMenu") then playerGui.AdminMenu:Destroy() end
 
@@ -2117,16 +2117,16 @@ for i, entry in ipairs(credits) do
 	role.TextSize = 11
 	role.TextXAlignment = Enum.TextXAlignment.Left
 
-	local name = Instance.new("TextLabel", row)
-	name.Size = UDim2.new(1, -10, 0, 16)
-	name.Position = UDim2.new(0, 0, 0, 22)
-	name.BackgroundTransparency = 1
-	name.Text = entry[2]
-	name.TextColor3 = currentTheme.Text
-	name.Font = Enum.Font.Gotham
-	name.TextSize = 12
-	name.TextXAlignment = Enum.TextXAlignment.Left
-	name.TextWrapped = true
+	local nameLbl = Instance.new("TextLabel", row)
+	nameLbl.Size = UDim2.new(1, -10, 0, 16)
+	nameLbl.Position = UDim2.new(0, 0, 0, 22)
+	nameLbl.BackgroundTransparency = 1
+	nameLbl.Text = entry[2]
+	nameLbl.TextColor3 = currentTheme.Text
+	nameLbl.Font = Enum.Font.Gotham
+	nameLbl.TextSize = 12
+	nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+	nameLbl.TextWrapped = true
 end
 
 createSection(pages.Autre, "ℹ  Version")
