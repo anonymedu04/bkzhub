@@ -1,7 +1,7 @@
 -- ================================================
 --  ADMIN MENU V8 | lopine06 | Touche B pour ouvrir
 -- ================================================
-task.defer(function()  -- defer = attend que Roblox soit prêt
+task.wait(1) -- attend que Roblox soit prêt
 
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -2087,6 +2087,52 @@ local function refreshAllESP()
 end
 
 -- ================================================
+
+-- toggle ESP helper
+local function toggleESP(key, state)
+	espState[key] = state
+	refreshAllESP()
+end
+
+
+-- UI ESP dans pages.ESP
+createSection(pages.ESP, "Rapide")
+createBtn(pages.ESP, "⚡  Tout activer", currentTheme.Accent, 0, function()
+	for k in pairs(espState) do espState[k] = true end
+	refreshAllESP()
+end)
+createBtn(pages.ESP, "❌  Tout désactiver", currentTheme.Danger, 1, function()
+	for k in pairs(espState) do espState[k] = false end
+	for _, p in ipairs(Players:GetPlayers()) do clearESPFor(p) end
+end)
+
+createSection(pages.ESP, "Joueurs")
+createToggle(pages.ESP, "📦  Boxes (SelectionBox)", 2, function(s) toggleESP("boxes", s) end)
+createToggle(pages.ESP, "🏷  Noms", 3, function(s) toggleESP("names", s) end)
+createToggle(pages.ESP, "❤  Santé", 4, function(s) toggleESP("health", s) end)
+createToggle(pages.ESP, "📏  Distance", 5, function(s) toggleESP("distance", s) end)
+createToggle(pages.ESP, "🎮  Niveau de santé (barre)", 6, function(s) toggleESP("healthBar", s) end)
+
+createSection(pages.ESP, "Visuel avancé")
+createToggle(pages.ESP, "🎯  Tracers (dot)", 7, function(s) toggleESP("tracers", s) end)
+createToggle(pages.ESP, "🔴  Head Dots", 8, function(s) toggleESP("headDots", s) end)
+createToggle(pages.ESP, "💀  Squelette (Beams)", 9, function(s) toggleESP("skeletons", s) end)
+createToggle(pages.ESP, "🔆  Chams (Highlight)", 10, function(s) toggleESP("chams", s) end)
+createToggle(pages.ESP, "🔫  Snaplines (centre écran)", 11, function(s) toggleESP("snaplines", s) end)
+
+createSection(pages.ESP, "Couleurs  —  🔴 Ennemis")
+createBtn(pages.ESP, "🔴  Rouge",   currentTheme.Danger,  12, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,60,60);  refreshAllESP() end)
+createBtn(pages.ESP, "🟠  Orange",  currentTheme.Warn,    13, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,140,30); refreshAllESP() end)
+createBtn(pages.ESP, "🟡  Jaune",   currentTheme.Warn,    14, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,220,50); refreshAllESP() end)
+createBtn(pages.ESP, "🟣  Violet",  currentTheme.Button,  15, function() ESP_COLOR_ENEMY = Color3.fromRGB(180,80,255); refreshAllESP() end)
+createBtn(pages.ESP, "⬜  Blanc",   currentTheme.Button,  16, function() ESP_COLOR_ENEMY = Color3.fromRGB(240,240,240); refreshAllESP() end)
+
+createSection(pages.ESP, "Couleurs  —  🔵 Alliés")
+createBtn(pages.ESP, "🔵  Bleu",    currentTheme.Button,  17, function() ESP_COLOR_ALLY = Color3.fromRGB(80,160,255);  refreshAllESP() end)
+createBtn(pages.ESP, "🟢  Vert",    currentTheme.Success, 18, function() ESP_COLOR_ALLY = Color3.fromRGB(50,220,100);  refreshAllESP() end)
+createBtn(pages.ESP, "🩵  Cyan",    currentTheme.Button,  19, function() ESP_COLOR_ALLY = Color3.fromRGB(0,210,255);   refreshAllESP() end)
+createBtn(pages.ESP, "🟤  Or",      currentTheme.Warn,    20, function() ESP_COLOR_ALLY = Color3.fromRGB(255,200,50);  refreshAllESP() end)
+
 -- PAGE AUTRE — Crédits
 -- ================================================
 createSection(pages.Autre, "👑  Crédits")
@@ -2160,6 +2206,28 @@ verLabel.LayoutOrder = 99
 			buildESPFor(p)
 		end
 	end
+
+
+-- Démarre la boucle ESP
+local function startESP()
+	Players.PlayerAdded:Connect(function(p)
+		p.CharacterAdded:Connect(function() task.wait(1); buildESPFor(p) end)
+	end)
+	Players.PlayerRemoving:Connect(function(p) clearESPFor(p) end)
+
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
+			if espState.distance then updateDistances() end
+		end
+	end)
+
+	for _, p in ipairs(Players:GetPlayers()) do
+		if p ~= player then
+			p.CharacterAdded:Connect(function() task.wait(1); buildESPFor(p) end)
+			buildESPFor(p)
+		end
+	end
 end
 
 startESP()
@@ -2177,48 +2245,3 @@ task.spawn(function()
 		end
 	end
 end)
-
--- Aide : toggle un état ESP et refresh
-local function toggleESP(key, state)
-	espState[key] = state
-	refreshAllESP()
-end
-
--- UI ESP dans pages.ESP
-createSection(pages.ESP, "Rapide")
-createBtn(pages.ESP, "⚡  Tout activer", currentTheme.Accent, 0, function()
-	for k in pairs(espState) do espState[k] = true end
-	refreshAllESP()
-end)
-createBtn(pages.ESP, "❌  Tout désactiver", currentTheme.Danger, 1, function()
-	for k in pairs(espState) do espState[k] = false end
-	for _, p in ipairs(Players:GetPlayers()) do clearESPFor(p) end
-end)
-
-createSection(pages.ESP, "Joueurs")
-createToggle(pages.ESP, "📦  Boxes (SelectionBox)", 2, function(s) toggleESP("boxes", s) end)
-createToggle(pages.ESP, "🏷  Noms", 3, function(s) toggleESP("names", s) end)
-createToggle(pages.ESP, "❤  Santé", 4, function(s) toggleESP("health", s) end)
-createToggle(pages.ESP, "📏  Distance", 5, function(s) toggleESP("distance", s) end)
-createToggle(pages.ESP, "🎮  Niveau de santé (barre)", 6, function(s) toggleESP("healthBar", s) end)
-
-createSection(pages.ESP, "Visuel avancé")
-createToggle(pages.ESP, "🎯  Tracers (dot)", 7, function(s) toggleESP("tracers", s) end)
-createToggle(pages.ESP, "🔴  Head Dots", 8, function(s) toggleESP("headDots", s) end)
-createToggle(pages.ESP, "💀  Squelette (Beams)", 9, function(s) toggleESP("skeletons", s) end)
-createToggle(pages.ESP, "🔆  Chams (Highlight)", 10, function(s) toggleESP("chams", s) end)
-createToggle(pages.ESP, "🔫  Snaplines (centre écran)", 11, function(s) toggleESP("snaplines", s) end)
-
-createSection(pages.ESP, "Couleurs  —  🔴 Ennemis")
-createBtn(pages.ESP, "🔴  Rouge",   currentTheme.Danger,  12, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,60,60);  refreshAllESP() end)
-createBtn(pages.ESP, "🟠  Orange",  currentTheme.Warn,    13, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,140,30); refreshAllESP() end)
-createBtn(pages.ESP, "🟡  Jaune",   currentTheme.Warn,    14, function() ESP_COLOR_ENEMY = Color3.fromRGB(255,220,50); refreshAllESP() end)
-createBtn(pages.ESP, "🟣  Violet",  currentTheme.Button,  15, function() ESP_COLOR_ENEMY = Color3.fromRGB(180,80,255); refreshAllESP() end)
-createBtn(pages.ESP, "⬜  Blanc",   currentTheme.Button,  16, function() ESP_COLOR_ENEMY = Color3.fromRGB(240,240,240); refreshAllESP() end)
-
-createSection(pages.ESP, "Couleurs  —  🔵 Alliés")
-createBtn(pages.ESP, "🔵  Bleu",    currentTheme.Button,  17, function() ESP_COLOR_ALLY = Color3.fromRGB(80,160,255);  refreshAllESP() end)
-createBtn(pages.ESP, "🟢  Vert",    currentTheme.Success, 18, function() ESP_COLOR_ALLY = Color3.fromRGB(50,220,100);  refreshAllESP() end)
-createBtn(pages.ESP, "🩵  Cyan",    currentTheme.Button,  19, function() ESP_COLOR_ALLY = Color3.fromRGB(0,210,255);   refreshAllESP() end)
-createBtn(pages.ESP, "🟤  Or",      currentTheme.Warn,    20, function() ESP_COLOR_ALLY = Color3.fromRGB(255,200,50);  refreshAllESP() end)
-end) -- fin task.defer
