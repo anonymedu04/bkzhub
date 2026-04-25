@@ -562,6 +562,20 @@ end
 
 UIS.InputBegan:Connect(function(input, gpe)
 	if not gpe and gokuMode and input.KeyCode == Enum.KeyCode.F then
+		-- Son de téléportation (whoosh + impact)
+		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			local sndTP = Instance.new("Sound", hrp)
+			sndTP.SoundId = "rbxassetid://1845482029"  -- whoosh téléportation
+			sndTP.Volume = 1.5; sndTP.PlaybackSpeed = 1.2
+			sndTP:Play(); Debris:AddItem(sndTP, 2)
+
+			local sndImpact = Instance.new("Sound", hrp)
+			sndImpact.SoundId = "rbxassetid://2645839829"  -- impact arrivée
+			sndImpact.Volume = 1; sndImpact.PlaybackSpeed = 0.9
+			task.delay(0.05, function() sndImpact:Play() end)
+			Debris:AddItem(sndImpact, 2)
+		end
 		playInstantTransmissionFX(mouse.Hit.p)
 	end
 end)
@@ -880,8 +894,8 @@ createToggle(pages.Perso, "🧊  Freeze (immobile)", 4, function(state)
 		player.Character.HumanoidRootPart.Anchored = state
 	end
 end)
+createSection(pages.Perso, "🦅  Vol")
 
--- FLY
 local flyEnabled = false
 local flyBodyVel, flyBodyGyro
 local flySpeed = 40
@@ -943,7 +957,7 @@ createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 200, 40, 6, function(val)
 	flySpeed = val
 end)
 
-createSection(pages.Perso, "👁  Visuel & Collision")
+createSection(pages.Perso, "👁  Collision & Visuel")
 
 createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state)
 	if state then
@@ -1104,38 +1118,147 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- UI Aim Lock
-local aimToggleFrame = createToggle(pages.Perso, "🎯  Aim Lock", 8, function(state)
+createSection(pages.Perso, "🎯  Aim Lock")
+
+createToggle(pages.Perso, "🎯  Aim Lock ON/OFF", 8, function(state)
 	aimLockEnabled = state
 	if state then startAimLoop() else stopAimLoop() end
 end)
 
--- Affichage de la touche actuelle
-local aimKeyLabel = Instance.new("TextLabel", pages.Perso)
-aimKeyLabel.Size = UDim2.new(1, 0, 0, 22)
-aimKeyLabel.BackgroundTransparency = 1
-aimKeyLabel.TextColor3 = currentTheme.SubText
-aimKeyLabel.Font = Enum.Font.Gotham
-aimKeyLabel.TextSize = 11
-aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "   |   Mode : " .. aimLockMode
-aimKeyLabel.TextXAlignment = Enum.TextXAlignment.Left
-aimKeyLabel.LayoutOrder = 9
+-- Dropdown générique réutilisable
+local function createDropdown(parent, label, options, defaultIdx, order, onChange)
+	local selectedIdx = defaultIdx
+	local open = false
 
-local function refreshAimLabel()
-	aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "   |   Mode : " .. aimLockMode
+	local headerF = Instance.new("Frame", parent)
+	headerF.Size = UDim2.new(1, 0, 0, 34)
+	headerF.BackgroundColor3 = currentTheme.Button
+	headerF.BorderSizePixel = 0
+	headerF.LayoutOrder = order
+	Instance.new("UICorner", headerF).CornerRadius = UDim.new(0, 8)
+
+	local lbl = Instance.new("TextLabel", headerF)
+	lbl.Size = UDim2.new(1, -34, 1, 0)
+	lbl.Position = UDim2.new(0, 10, 0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = label .. " : " .. options[selectedIdx]
+	lbl.TextColor3 = currentTheme.Text
+	lbl.Font = Enum.Font.Gotham; lbl.TextSize = 12
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local arrow = Instance.new("TextLabel", headerF)
+	arrow.Size = UDim2.new(0, 24, 1, 0)
+	arrow.Position = UDim2.new(1, -28, 0, 0)
+	arrow.BackgroundTransparency = 1
+	arrow.Text = "▾"; arrow.TextColor3 = currentTheme.SubText
+	arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 13
+
+	local listF = Instance.new("ScrollingFrame", parent)
+	listF.Size = UDim2.new(1, 0, 0, 0)
+	listF.CanvasSize = UDim2.new(0, 0, 0, 0)
+	listF.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	listF.BackgroundColor3 = currentTheme.Panel
+	listF.BorderSizePixel = 0
+	listF.ScrollBarThickness = 3
+	listF.ClipsDescendants = true
+	listF.Visible = false
+	listF.LayoutOrder = order
+	Instance.new("UICorner", listF).CornerRadius = UDim.new(0, 8)
+	local ll = Instance.new("UIListLayout", listF)
+	ll.Padding = UDim.new(0, 1)
+
+	for i, opt in ipairs(options) do
+		local row = Instance.new("TextButton", listF)
+		row.Size = UDim2.new(1, 0, 0, 28)
+		row.BackgroundTransparency = 1
+		row.Text = opt
+		row.TextColor3 = currentTheme.Text
+		row.Font = Enum.Font.Gotham; row.TextSize = 12
+		row.BorderSizePixel = 0
+		row.MouseEnter:Connect(function() row.BackgroundTransparency = 0.8 end)
+		row.MouseLeave:Connect(function() row.BackgroundTransparency = 1 end)
+		row.MouseButton1Click:Connect(function()
+			selectedIdx = i
+			lbl.Text = label .. " : " .. options[selectedIdx]
+			onChange(options[selectedIdx])
+			open = false
+			TweenService:Create(listF, TweenInfo.new(0.15), {Size = UDim2.new(1,0,0,0)}):Play()
+			task.delay(0.15, function() listF.Visible = false end)
+		end)
+	end
+
+	local headerBtn = Instance.new("TextButton", headerF)
+	headerBtn.Size = UDim2.new(1, 0, 1, 0)
+	headerBtn.BackgroundTransparency = 1; headerBtn.Text = ""
+	headerBtn.MouseButton1Click:Connect(function()
+		open = not open
+		listF.Visible = true
+		local h = open and math.min(#options * 29, 174) or 0
+		TweenService:Create(listF, TweenInfo.new(0.15), {Size = UDim2.new(1,0,0,h)}):Play()
+		if not open then task.delay(0.15, function() listF.Visible = false end) end
+	end)
+
+	return lbl
 end
 
--- Bouton rebind
-createBtn(pages.Perso, "⌨  Changer la touche aim", currentTheme.Button, 10, function()
-	aimBindingMode = true
-	showNotification("⌨  Appuie sur la touche souhaitée...", 3)
+local MOUSE_OPTIONS = {
+	"Mouse2 (Clic droit)",
+	"Mouse1 (Clic gauche)",
+	"Mouse3 (Molette)",
+}
+local KEY_OPTIONS = {
+	"E","R","T","G","H","X","C","V","Z",
+	"LeftAlt","RightAlt",
+	"LeftShift","RightShift",
+	"LeftControl","RightControl",
+	"Q","F","J","K","L","N","M",
+	"One","Two","Three","Four",
+	"F1","F2","F3","F4","F5",
+	"Comma","Period","Semicolon",
+}
+
+-- Map option → aimLockKey
+local function optToKey(opt)
+	if opt:find("Mouse2") then return "Mouse2"
+	elseif opt:find("Mouse1") then return "Mouse1"
+	elseif opt:find("Mouse3") then return "Mouse3"
+	else return opt end
+end
+
+-- Dropdown Souris
+createDropdown(pages.Perso, "🖱  Touche souris", MOUSE_OPTIONS, 1, 9, function(opt)
+	aimLockKey = optToKey(opt)
+	refreshAimLabel()
+	showNotification("🎯  Aim touche : " .. aimLockKey, 2)
 end)
 
--- Toggle mode hold/toggle
-createBtn(pages.Perso, "🔄  Mode : Hold ↔ Toggle", currentTheme.Button, 11, function()
+-- Dropdown Clavier
+createDropdown(pages.Perso, "⌨  Touche clavier", KEY_OPTIONS, 1, 10, function(opt)
+	aimLockKey = opt
+	refreshAimLabel()
+	showNotification("🎯  Aim touche : " .. aimLockKey, 2)
+end)
+
+-- Mode Hold/Toggle
+createBtn(pages.Perso, "🔄  Mode : Hold / Toggle", currentTheme.Button, 11, function()
 	aimLockMode = (aimLockMode == "hold") and "toggle" or "hold"
 	refreshAimLabel()
 	showNotification("🎯  Mode aim : " .. aimLockMode, 2)
 end)
+
+-- Label état actuel
+local aimKeyLabel = Instance.new("TextLabel", pages.Perso)
+aimKeyLabel.Size = UDim2.new(1, 0, 0, 20)
+aimKeyLabel.BackgroundTransparency = 1
+aimKeyLabel.TextColor3 = currentTheme.SubText
+aimKeyLabel.Font = Enum.Font.Gotham; aimKeyLabel.TextSize = 11
+aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
+aimKeyLabel.TextXAlignment = Enum.TextXAlignment.Left
+aimKeyLabel.LayoutOrder = 12
+
+local function refreshAimLabel()
+	aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
+end
 
 createSection(pages.Perso, "📐  Apparence")
 
