@@ -1820,8 +1820,8 @@ local function spawnExplosionFX(pos)
 	if hrp then
 		local boom = Instance.new("Sound", hrp)
 		boom.SoundId = "rbxassetid://2248511717"
-		boom.Volume = 5; boom.RollOffMaxDistance = 300
-		boom:Play(); Debris:AddItem(boom, 3)
+		boom.Volume = 1; boom.RollOffMaxDistance = 500
+		boom:Play(); Debris:AddItem(boom, 4)
 	end
 end
 
