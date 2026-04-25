@@ -482,7 +482,7 @@ local function playInstantTransmissionFX(position)
 	-- Son départ : whoosh puissant
 	local snd1 = Instance.new("Sound", hrp)
 	snd1.SoundId = "rbxassetid://126099526912322"
-	snd1.Volume = 0.1; snd1.PlaybackSpeed = 1
+	snd1.Volume = 2.5; snd1.PlaybackSpeed = 1.3
 	snd1:Play(); Debris:AddItem(snd1, 2)
 
 	-- Afterimage fantôme du perso à l'origine
@@ -522,8 +522,8 @@ local function playInstantTransmissionFX(position)
 
 	-- Son impact arrivée
 	local snd2 = Instance.new("Sound", hrp)
-	snd2.SoundId = "rbxassetid://135938385687045"
-	snd2.Volume = 0.1; snd2.PlaybackSpeed = 0.85
+	snd2.SoundId = "rbxassetid://3716468774"
+	snd2.Volume = 2; snd2.PlaybackSpeed = 0.85
 	snd2:Play(); Debris:AddItem(snd2, 2)
 
 	local arrCF = hrp.CFrame
@@ -567,12 +567,12 @@ UIS.InputBegan:Connect(function(input, gpe)
 		if hrp then
 			local sndTP = Instance.new("Sound", hrp)
 			sndTP.SoundId = "rbxassetid://126099526912322"  -- whoosh téléportation
-			sndTP.Volume = 0.1; sndTP.PlaybackSpeed = 1
+			sndTP.Volume = 1.5; sndTP.PlaybackSpeed = 1.2
 			sndTP:Play(); Debris:AddItem(sndTP, 2)
 
 			local sndImpact = Instance.new("Sound", hrp)
 			sndImpact.SoundId = "rbxassetid://135938385687045"  -- impact arrivée
-			sndImpact.Volume = 0.1; sndImpact.PlaybackSpeed = 1
+			sndImpact.Volume = 1; sndImpact.PlaybackSpeed = 0.9
 			task.delay(0.05, function() sndImpact:Play() end)
 			Debris:AddItem(sndImpact, 2)
 		end
@@ -953,7 +953,7 @@ createToggle(pages.Perso, "🦅  Fly  (WASD + Space/Ctrl)", 5, function(state)
 	if state then enableFly() else disableFly() end
 end)
 
-createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 900, 40, 6, function(val)
+createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 200, 40, 6, function(val)
 	flySpeed = val
 end)
 
@@ -1014,262 +1014,263 @@ end)
 createSection(pages.Perso, "🎯  Combat")
 
 -- ================================================
--- AIM LOCK — système complet
+-- AIMBOT — refait complet
+-- smooth, moins agressif, toutes touches
 -- ================================================
-local aimLockEnabled  = false   -- feature activée
-local aimLockActive   = false   -- actuellement en train de viser
-local aimLockConn     = nil
-local aimLockMode     = "hold"  -- "hold" ou "toggle"
-local aimLockKey      = "Mouse2" -- touche par défaut = clic droit
-local aimBindingMode  = false   -- attend une touche
+local aimEnabled   = false
+local aimActive    = false
+local aimConn      = nil
+local aimMode      = "hold"    -- "hold" ou "toggle"
+local aimKey       = "Mouse2"  -- défaut clic droit
+local aimSmooth    = 0.08      -- 0.01 = très doux, 0.3 = rapide
+local aimFOV       = 250       -- rayon FOV en pixels
 
--- Trouve le joueur visible le plus proche
-local function getAimTarget()
-	local cam = workspace.CurrentCamera
+-- Toutes les touches souris possibles
+local MOUSE_KEYS = {
+	{ label = "Clic Droit  (Mouse2)",   id = "Mouse2"  },
+	{ label = "Clic Gauche  (Mouse1)",  id = "Mouse1"  },
+	{ label = "Clic Molette  (Mouse3)", id = "Mouse3"  },
+}
+
+-- Toutes les touches clavier (KeyCode.Name valides Roblox)
+local KEYBOARD_KEYS = {
+	-- Lettres
+	"A","B","C","D","E","F","G","H","I","J","K","L","M",
+	"N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+	-- Chiffres rangée du haut
+	"Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+	-- Touches fonction
+	"F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12",
+	-- Modificateurs
+	"LeftShift","RightShift","LeftControl","RightControl","LeftAlt","RightAlt",
+	-- Navigation
+	"Up","Down","Left","Right","Home","End","PageUp","PageDown","Insert","Delete",
+	-- Pavé numérique
+	"KeypadZero","KeypadOne","KeypadTwo","KeypadThree","KeypadFour",
+	"KeypadFive","KeypadSix","KeypadSeven","KeypadEight","KeypadNine",
+	"KeypadPlus","KeypadMinus","KeypadAsterisk","KeypadSlash","KeypadPeriod",
+	-- Divers
+	"Tab","CapsLock","Space","BackSpace","Return","Escape",
+	"Minus","Equals","LeftBracket","RightBracket","BackSlash",
+	"Semicolon","Quote","Comma","Period","Slash","Backquote",
+}
+
+-- Vérifie si un input correspond à la touche aim
+local function isAimInput(input, began)
+	if aimKey == "Mouse1" then
+		return input.UserInputType == Enum.UserInputType.MouseButton1
+	elseif aimKey == "Mouse2" then
+		return input.UserInputType == Enum.UserInputType.MouseButton2
+	elseif aimKey == "Mouse3" then
+		return input.UserInputType == Enum.UserInputType.MouseButton3
+	else
+		return input.UserInputType == Enum.UserInputType.Keyboard
+			and input.KeyCode.Name == aimKey
+	end
+end
+
+-- Trouve la cible dans le FOV
+local function getTarget()
+	local cam   = workspace.CurrentCamera
 	local myHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not myHRP then return nil end
-	local closest, closestDist = nil, math.huge
+
+	local best, bestScore = nil, math.huge
+	local vp = cam.ViewportSize
+	local cx, cy = vp.X / 2, vp.Y / 2
+
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p ~= player and p.Character then
+			local hum  = p.Character:FindFirstChildOfClass("Humanoid")
 			local head = p.Character:FindFirstChild("Head")
-			local hrp  = p.Character:FindFirstChild("HumanoidRootPart")
-			local tgt  = head or hrp
-			if tgt then
-				-- FOV check (angle par rapport au centre écran)
-				local screenPos, onScreen = cam:WorldToViewportPoint(tgt.Position)
-				local vp = cam.ViewportSize
-				local dx = screenPos.X - vp.X / 2
-				local dy = screenPos.Y - vp.Y / 2
-				local fovDist = math.sqrt(dx*dx + dy*dy)
-				local worldDist = (tgt.Position - myHRP.Position).Magnitude
-				-- Pondération : FOV prioritaire, distance secondaire
-				local score = fovDist + worldDist * 0.5
-				if onScreen and fovDist < 300 and score < closestDist then
-					closestDist = score
-					closest = p
+			if hum and hum.Health > 0 and head then
+				local sp, onScreen = cam:WorldToViewportPoint(head.Position)
+				if onScreen and sp.Z > 0 then
+					local dx = sp.X - cx
+					local dy = sp.Y - cy
+					local fovDist = math.sqrt(dx*dx + dy*dy)
+					if fovDist < aimFOV and fovDist < bestScore then
+						bestScore = fovDist
+						best = p
+					end
 				end
 			end
 		end
 	end
-	return closest
+	return best
 end
 
-local function startAimLoop()
-	if aimLockConn then return end
-	aimLockConn = RunService.RenderStepped:Connect(function()
-		if not aimLockActive then return end
-		local t = getAimTarget()
-		if not t or not t.Character then return end
-		local head = t.Character:FindFirstChild("Head") or t.Character:FindFirstChild("HumanoidRootPart")
+-- Boucle aim : lerp doux vers la cible
+local function startAim()
+	if aimConn then return end
+	aimConn = RunService.RenderStepped:Connect(function()
+		if not aimActive then return end
+		local t = getTarget()
+		if not (t and t.Character) then return end
+		local head = t.Character:FindFirstChild("Head")
 		if not head then return end
 		local cam = workspace.CurrentCamera
-		local dir = (head.Position - cam.CFrame.Position).Unit
-		-- Smooth aim (lerp)
-		local targetCF = CFrame.new(cam.CFrame.Position, cam.CFrame.Position + dir)
-		cam.CFrame = cam.CFrame:Lerp(targetCF, 0.25)
+		local targetCF = CFrame.new(cam.CFrame.Position, head.Position)
+		-- Lerp doux — aimSmooth contrôle la vitesse
+		cam.CFrame = cam.CFrame:Lerp(targetCF, aimSmooth)
 	end)
 end
 
-local function stopAimLoop()
-	if aimLockConn then aimLockConn:Disconnect(); aimLockConn = nil end
-	aimLockActive = false
+local function stopAim()
+	if aimConn then aimConn:Disconnect(); aimConn = nil end
+	aimActive = false
 end
 
--- Gestion entrée clavier/souris pour activer l'aimlock
-local function isAimKey(input)
-	if aimLockKey == "Mouse2" then
-		return input.UserInputType == Enum.UserInputType.MouseButton2
-	elseif aimLockKey == "Mouse1" then
-		return input.UserInputType == Enum.UserInputType.MouseButton1
-	elseif aimLockKey == "Mouse3" then
-		return input.UserInputType == Enum.UserInputType.MouseButton3
-	elseif Enum.KeyCode[aimLockKey] then
-		return input.KeyCode == Enum.KeyCode[aimLockKey]
-	end
-	return false
-end
-
+-- Écoute InputBegan/Ended
 UIS.InputBegan:Connect(function(input, gpe)
-	if gpe then return end
-	-- Mode rebind : capture la prochaine touche
-	if aimBindingMode then
-		if input.UserInputType == Enum.UserInputType.MouseButton2 then
-			aimLockKey = "Mouse2"
-		elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-			aimLockKey = "Mouse1"
-		elseif input.KeyCode ~= Enum.KeyCode.Unknown then
-			aimLockKey = input.KeyCode.Name
-		end
-		aimBindingMode = false
-		showNotification("🎯  Touche aim : " .. aimLockKey, 2)
-		return
-	end
-	if not aimLockEnabled then return end
-	if isAimKey(input) then
-		if aimLockMode == "hold" then
-			aimLockActive = true
-		else -- toggle
-			aimLockActive = not aimLockActive
+	if gpe or not aimEnabled then return end
+	if isAimInput(input) then
+		if aimMode == "toggle" then
+			aimActive = not aimActive
+		else
+			aimActive = true
 		end
 	end
 end)
-
 UIS.InputEnded:Connect(function(input)
-	if aimLockMode == "hold" and isAimKey(input) then
-		aimLockActive = false
+	if aimMode == "hold" and isAimInput(input) then
+		aimActive = false
 	end
 end)
 
 -- ================================================
--- UI AIM LOCK (section dans Perso)
+-- UI AIMBOT
 -- ================================================
 createSection(pages.Perso, "🎯  Aim Lock")
 
--- Label déclaré EN PREMIER pour que refreshAimLabel fonctionne
-local aimKeyLabel = Instance.new("TextLabel", pages.Perso)
-aimKeyLabel.Size = UDim2.new(1, 0, 0, 20)
-aimKeyLabel.BackgroundTransparency = 1
-aimKeyLabel.TextColor3 = currentTheme.SubText
-aimKeyLabel.Font = Enum.Font.Gotham; aimKeyLabel.TextSize = 11
-aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
-aimKeyLabel.TextXAlignment = Enum.TextXAlignment.Left
-aimKeyLabel.LayoutOrder = 8
-
-local function refreshAimLabel()
-	aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
+-- Déclaration AVANT usage
+local aimStatusLabel = Instance.new("TextLabel", pages.Perso)
+aimStatusLabel.Size  = UDim2.new(1, 0, 0, 18)
+aimStatusLabel.BackgroundTransparency = 1
+aimStatusLabel.TextColor3 = currentTheme.SubText
+aimStatusLabel.Font  = Enum.Font.Gotham
+aimStatusLabel.TextSize = 11
+aimStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+aimStatusLabel.LayoutOrder = 100
+local function updateAimStatus()
+	aimStatusLabel.Text = "  Touche: " .. aimKey
+		.. "   Mode: " .. aimMode
+		.. "   Smooth: " .. math.floor(aimSmooth * 100) .. "%"
 end
+updateAimStatus()
 
--- Toggle ON/OFF
-createToggle(pages.Perso, "🎯  Aim Lock ON/OFF", 9, function(state)
-	aimLockEnabled = state
-	if state then startAimLoop() else stopAimLoop() end
+-- Toggle principal
+createToggle(pages.Perso, "🎯  Aim Lock ON / OFF", 101, function(state)
+	aimEnabled = state
+	if state then startAim() else stopAim() end
 end)
 
--- Dropdown générique
-local function createDropdown(parent, label, options, defaultIdx, order, onChange)
-	local selectedIdx = defaultIdx
-	local open = false
+-- Slider smooth (vitesse de visée)
+createSlider(pages.Perso, "🎚  Smooth (douceur)", 1, 30, 8, 102, function(val)
+	aimSmooth = val / 100
+	updateAimStatus()
+end)
 
-	local headerF = Instance.new("Frame", parent)
-	headerF.Size = UDim2.new(1, 0, 0, 34)
-	headerF.BackgroundColor3 = currentTheme.Button
-	headerF.BorderSizePixel = 0
-	headerF.LayoutOrder = order
-	Instance.new("UICorner", headerF).CornerRadius = UDim.new(0, 8)
+-- Slider FOV
+createSlider(pages.Perso, "🔵  FOV (rayon pixels)", 50, 600, 250, 103, function(val)
+	aimFOV = val
+end)
 
-	local lbl = Instance.new("TextLabel", headerF)
-	lbl.Size = UDim2.new(1, -34, 1, 0)
-	lbl.Position = UDim2.new(0, 10, 0, 0)
-	lbl.BackgroundTransparency = 1
-	lbl.Text = label .. " : " .. options[selectedIdx]
-	lbl.TextColor3 = currentTheme.Text
-	lbl.Font = Enum.Font.Gotham; lbl.TextSize = 12
-	lbl.TextXAlignment = Enum.TextXAlignment.Left
+-- Mode Hold / Toggle
+createBtn(pages.Perso, "🔄  Mode : " .. aimMode, currentTheme.Button, 104, function(btn)
+	aimMode = (aimMode == "hold") and "toggle" or "hold"
+	updateAimStatus()
+	showNotification("🎯  Mode : " .. aimMode, 2)
+end)
 
-	local arrow = Instance.new("TextLabel", headerF)
-	arrow.Size = UDim2.new(0, 24, 1, 0)
-	arrow.Position = UDim2.new(1, -28, 0, 0)
-	arrow.BackgroundTransparency = 1
-	arrow.Text = "▾"; arrow.TextColor3 = currentTheme.SubText
-	arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 14
+-- Dropdown générique (déclaré ici, utilisé pour souris et clavier)
+local function mkDropdown(parent, label, items, defaultIdx, order, onPick)
+	local selIdx = defaultIdx
+	local open   = false
 
-	local listF = Instance.new("ScrollingFrame", parent)
-	listF.Size = UDim2.new(1, 0, 0, 0)
-	listF.CanvasSize = UDim2.new(0, 0, 0, 0)
-	listF.AutomaticCanvasSize = Enum.AutomaticSize.Y
-	listF.BackgroundColor3 = currentTheme.Panel
-	listF.BorderSizePixel = 0
-	listF.ScrollBarThickness = 3
-	listF.ClipsDescendants = true
-	listF.Visible = false
-	listF.LayoutOrder = order
-	Instance.new("UICorner", listF).CornerRadius = UDim.new(0, 8)
-	Instance.new("UIListLayout", listF).Padding = UDim.new(0, 1)
+	local hdr = Instance.new("Frame", parent)
+	hdr.Size = UDim2.new(1,0,0,34)
+	hdr.BackgroundColor3 = currentTheme.Button
+	hdr.BorderSizePixel  = 0
+	hdr.LayoutOrder      = order
+	Instance.new("UICorner", hdr).CornerRadius = UDim.new(0, 8)
 
-	for i, opt in ipairs(options) do
-		local row = Instance.new("TextButton", listF)
-		row.Size = UDim2.new(1, 0, 0, 28)
+	local htxt = Instance.new("TextLabel", hdr)
+	htxt.Size = UDim2.new(1,-28,1,0)
+	htxt.Position = UDim2.new(0,10,0,0)
+	htxt.BackgroundTransparency = 1
+	htxt.Text = label .. " : " .. items[selIdx]
+	htxt.TextColor3 = currentTheme.Text
+	htxt.Font = Enum.Font.Gotham; htxt.TextSize = 12
+	htxt.TextXAlignment = Enum.TextXAlignment.Left
+
+	local arrw = Instance.new("TextLabel", hdr)
+	arrw.Size = UDim2.new(0,24,1,0)
+	arrw.Position = UDim2.new(1,-26,0,0)
+	arrw.BackgroundTransparency = 1
+	arrw.Text = "▾"; arrw.TextColor3 = currentTheme.SubText
+	arrw.Font = Enum.Font.GothamBold; arrw.TextSize = 14
+
+	local list = Instance.new("ScrollingFrame", parent)
+	list.Size = UDim2.new(1,0,0,0)
+	list.CanvasSize = UDim2.new(0,0,0,0)
+	list.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	list.BackgroundColor3 = currentTheme.Panel
+	list.BorderSizePixel  = 0
+	list.ScrollBarThickness = 3
+	list.ClipsDescendants = true
+	list.Visible = false
+	list.LayoutOrder = order
+	Instance.new("UICorner", list).CornerRadius = UDim.new(0, 8)
+	Instance.new("UIListLayout", list).Padding = UDim.new(0, 1)
+
+	for i, item in ipairs(items) do
+		local row = Instance.new("TextButton", list)
+		row.Size = UDim2.new(1,0,0,26)
 		row.BackgroundTransparency = 1
-		row.Text = "  " .. opt
+		row.Text = "  " .. item
 		row.TextColor3 = currentTheme.Text
 		row.Font = Enum.Font.Gotham; row.TextSize = 12
 		row.TextXAlignment = Enum.TextXAlignment.Left
 		row.BorderSizePixel = 0
-		row.MouseEnter:Connect(function() row.BackgroundTransparency = 0.85 end)
+		row.MouseEnter:Connect(function() row.BackgroundTransparency = 0.8 end)
 		row.MouseLeave:Connect(function() row.BackgroundTransparency = 1 end)
 		row.MouseButton1Click:Connect(function()
-			selectedIdx = i
-			lbl.Text = label .. " : " .. options[selectedIdx]
-			onChange(options[selectedIdx])
+			selIdx = i
+			htxt.Text = label .. " : " .. items[selIdx]
+			onPick(items[selIdx])
 			open = false
-			TweenService:Create(listF, TweenInfo.new(0.15), {Size = UDim2.new(1,0,0,0)}):Play()
-			task.delay(0.16, function() listF.Visible = false end)
+			TweenService:Create(list, TweenInfo.new(0.14), {Size=UDim2.new(1,0,0,0)}):Play()
+			task.delay(0.15, function() list.Visible = false end)
 		end)
 	end
 
-	local headerBtn = Instance.new("TextButton", headerF)
-	headerBtn.Size = UDim2.new(1, 0, 1, 0)
-	headerBtn.BackgroundTransparency = 1; headerBtn.Text = ""
-	headerBtn.MouseButton1Click:Connect(function()
+	local hbtn = Instance.new("TextButton", hdr)
+	hbtn.Size = UDim2.new(1,0,1,0)
+	hbtn.BackgroundTransparency = 1; hbtn.Text = ""
+	hbtn.MouseButton1Click:Connect(function()
 		open = not open
-		listF.Visible = true
-		local h = open and math.min(#options * 29, 200) or 0
-		TweenService:Create(listF, TweenInfo.new(0.15), {Size = UDim2.new(1,0,0,h)}):Play()
-		if not open then task.delay(0.16, function() listF.Visible = false end) end
+		list.Visible = true
+		local h = open and math.min(#items * 27, 216) or 0
+		TweenService:Create(list, TweenInfo.new(0.14), {Size=UDim2.new(1,0,0,h)}):Play()
+		if not open then task.delay(0.15, function() list.Visible = false end) end
 	end)
 end
 
--- Souris — toutes les options
-local MOUSE_OPTIONS = {
-	"Mouse2  —  Clic droit",
-	"Mouse1  —  Clic gauche",
-	"Mouse3  —  Clic molette",
-}
-local function mouseOptToKey(opt)
-	if opt:find("Mouse2") then return "Mouse2"
-	elseif opt:find("Mouse1") then return "Mouse1"
-	else return "Mouse3" end
-end
+-- Labels pour les dropdowns
+local MOUSE_LABELS = {}
+for _, m in ipairs(MOUSE_KEYS) do table.insert(MOUSE_LABELS, m.label) end
 
--- Clavier — liste complète
-local KEY_OPTIONS = {
-	-- Lettres courantes
-	"E","R","T","Y","U","G","H","J","K","L",
-	"X","C","V","B","N","M","Z","Q",
-	-- Modificateurs
-	"LeftAlt","RightAlt",
-	"LeftShift","RightShift",
-	"LeftControl","RightControl",
-	-- Touches fonction
-	"F1","F2","F3","F4","F5","F6","F7","F8",
-	-- Chiffres
-	"One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Zero",
-	-- Pavé numérique
-	"KeypadOne","KeypadTwo","KeypadThree","KeypadFour","KeypadFive",
-	-- Autres
-	"Tab","CapsLock","Space","BackSpace","Delete",
-	"Insert","Home","End","PageUp","PageDown",
-	"Up","Down","Left","Right",
-	"Comma","Period","Semicolon","Quote","Slash","BackSlash",
-	"Minus","Equals","LeftBracket","RightBracket",
-}
-
-createDropdown(pages.Perso, "🖱  Touche souris", MOUSE_OPTIONS, 1, 10, function(opt)
-	aimLockKey = mouseOptToKey(opt)
-	refreshAimLabel()
-	showNotification("🎯  Aim : " .. aimLockKey, 2)
+mkDropdown(pages.Perso, "🖱  Souris", MOUSE_LABELS, 1, 105, function(lbl)
+	for _, m in ipairs(MOUSE_KEYS) do
+		if m.label == lbl then aimKey = m.id; break end
+	end
+	updateAimStatus()
 end)
 
-createDropdown(pages.Perso, "⌨  Touche clavier", KEY_OPTIONS, 1, 11, function(opt)
-	aimLockKey = opt
-	refreshAimLabel()
-	showNotification("🎯  Aim : " .. aimLockKey, 2)
-end)
-
-createBtn(pages.Perso, "🔄  Mode Hold / Toggle", currentTheme.Button, 12, function()
-	aimLockMode = (aimLockMode == "hold") and "toggle" or "hold"
-	refreshAimLabel()
-	showNotification("🎯  Mode : " .. aimLockMode, 2)
+mkDropdown(pages.Perso, "⌨  Clavier", KEYBOARD_KEYS, 1, 106, function(key)
+	aimKey = key
+	updateAimStatus()
 end)
 
 createSection(pages.Perso, "📐  Apparence")
@@ -1820,8 +1821,8 @@ local function spawnExplosionFX(pos)
 	if hrp then
 		local boom = Instance.new("Sound", hrp)
 		boom.SoundId = "rbxassetid://84792688181059"
-		boom.Volume = 0; boom.RollOffMaxDistance = 200
-		boom:Play(); Debris:AddItem(boom, 1)
+		boom.Volume = 5; boom.RollOffMaxDistance = 300
+		boom:Play(); Debris:AddItem(boom, 3)
 	end
 end
 
@@ -1912,7 +1913,7 @@ createBtn(pages.Perso, "💣  Explosion sur place", currentTheme.Danger, 11, fun
 	Debris:AddItem(boom1, 4)
 
 	local boom2 = Instance.new("Sound", hrp)
-	boom2.SoundId = "rbxassetid://84792688181059"; boom2.Volume = 3  -- basse explosion
+	boom2.SoundId = "rbxassetid://3716468774"; boom2.Volume = 3  -- basse explosion
 	boom2.RollOffMaxDistance = 200; boom2:Play()
 	Debris:AddItem(boom2, 3)
 
