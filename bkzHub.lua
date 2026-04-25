@@ -481,7 +481,7 @@ local function playInstantTransmissionFX(position)
 
 	-- Son départ : whoosh puissant
 	local snd1 = Instance.new("Sound", hrp)
-	snd1.SoundId = "rbxassetid://5862172647"
+	snd1.SoundId = "rbxassetid://139797353086923"
 	snd1.Volume = 2.5; snd1.PlaybackSpeed = 1.3
 	snd1:Play(); Debris:AddItem(snd1, 2)
 
@@ -522,7 +522,7 @@ local function playInstantTransmissionFX(position)
 
 	-- Son impact arrivée
 	local snd2 = Instance.new("Sound", hrp)
-	snd2.SoundId = "rbxassetid://3716468774"
+	snd2.SoundId = "rbxassetid://98636533118333"
 	snd2.Volume = 2; snd2.PlaybackSpeed = 0.85
 	snd2:Play(); Debris:AddItem(snd2, 2)
 
@@ -566,12 +566,12 @@ UIS.InputBegan:Connect(function(input, gpe)
 		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			local sndTP = Instance.new("Sound", hrp)
-			sndTP.SoundId = "rbxassetid://1845482029"  -- whoosh téléportation
+			sndTP.SoundId = "rbxassetid://139797353086923"  -- whoosh téléportation
 			sndTP.Volume = 1.5; sndTP.PlaybackSpeed = 1.2
 			sndTP:Play(); Debris:AddItem(sndTP, 2)
 
 			local sndImpact = Instance.new("Sound", hrp)
-			sndImpact.SoundId = "rbxassetid://2645839829"  -- impact arrivée
+			sndImpact.SoundId = "rbxassetid://98636533118333"  -- impact arrivée
 			sndImpact.Volume = 1; sndImpact.PlaybackSpeed = 0.9
 			task.delay(0.05, function() sndImpact:Play() end)
 			Debris:AddItem(sndImpact, 2)
@@ -1820,8 +1820,8 @@ local function spawnExplosionFX(pos)
 	if hrp then
 		local boom = Instance.new("Sound", hrp)
 		boom.SoundId = "rbxassetid://2248511717"
-		boom.Volume = 1; boom.RollOffMaxDistance = 500
-		boom:Play(); Debris:AddItem(boom, 4)
+		boom.Volume = 0; boom.RollOffMaxDistance = 200
+		boom:Play(); Debris:AddItem(boom, 1)
 	end
 end
 
