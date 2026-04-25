@@ -1081,9 +1081,12 @@ local function isAimKey(input)
 		return input.UserInputType == Enum.UserInputType.MouseButton2
 	elseif aimLockKey == "Mouse1" then
 		return input.UserInputType == Enum.UserInputType.MouseButton1
-	else
+	elseif aimLockKey == "Mouse3" then
+		return input.UserInputType == Enum.UserInputType.MouseButton3
+	elseif Enum.KeyCode[aimLockKey] then
 		return input.KeyCode == Enum.KeyCode[aimLockKey]
 	end
+	return false
 end
 
 UIS.InputBegan:Connect(function(input, gpe)
@@ -1117,15 +1120,32 @@ UIS.InputEnded:Connect(function(input)
 	end
 end)
 
--- UI Aim Lock
+-- ================================================
+-- UI AIM LOCK (section dans Perso)
+-- ================================================
 createSection(pages.Perso, "🎯  Aim Lock")
 
-createToggle(pages.Perso, "🎯  Aim Lock ON/OFF", 8, function(state)
+-- Label déclaré EN PREMIER pour que refreshAimLabel fonctionne
+local aimKeyLabel = Instance.new("TextLabel", pages.Perso)
+aimKeyLabel.Size = UDim2.new(1, 0, 0, 20)
+aimKeyLabel.BackgroundTransparency = 1
+aimKeyLabel.TextColor3 = currentTheme.SubText
+aimKeyLabel.Font = Enum.Font.Gotham; aimKeyLabel.TextSize = 11
+aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
+aimKeyLabel.TextXAlignment = Enum.TextXAlignment.Left
+aimKeyLabel.LayoutOrder = 8
+
+local function refreshAimLabel()
+	aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
+end
+
+-- Toggle ON/OFF
+createToggle(pages.Perso, "🎯  Aim Lock ON/OFF", 9, function(state)
 	aimLockEnabled = state
 	if state then startAimLoop() else stopAimLoop() end
 end)
 
--- Dropdown générique réutilisable
+-- Dropdown générique
 local function createDropdown(parent, label, options, defaultIdx, order, onChange)
 	local selectedIdx = defaultIdx
 	local open = false
@@ -1151,7 +1171,7 @@ local function createDropdown(parent, label, options, defaultIdx, order, onChang
 	arrow.Position = UDim2.new(1, -28, 0, 0)
 	arrow.BackgroundTransparency = 1
 	arrow.Text = "▾"; arrow.TextColor3 = currentTheme.SubText
-	arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 13
+	arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 14
 
 	local listF = Instance.new("ScrollingFrame", parent)
 	listF.Size = UDim2.new(1, 0, 0, 0)
@@ -1164,18 +1184,18 @@ local function createDropdown(parent, label, options, defaultIdx, order, onChang
 	listF.Visible = false
 	listF.LayoutOrder = order
 	Instance.new("UICorner", listF).CornerRadius = UDim.new(0, 8)
-	local ll = Instance.new("UIListLayout", listF)
-	ll.Padding = UDim.new(0, 1)
+	Instance.new("UIListLayout", listF).Padding = UDim.new(0, 1)
 
 	for i, opt in ipairs(options) do
 		local row = Instance.new("TextButton", listF)
 		row.Size = UDim2.new(1, 0, 0, 28)
 		row.BackgroundTransparency = 1
-		row.Text = opt
+		row.Text = "  " .. opt
 		row.TextColor3 = currentTheme.Text
 		row.Font = Enum.Font.Gotham; row.TextSize = 12
+		row.TextXAlignment = Enum.TextXAlignment.Left
 		row.BorderSizePixel = 0
-		row.MouseEnter:Connect(function() row.BackgroundTransparency = 0.8 end)
+		row.MouseEnter:Connect(function() row.BackgroundTransparency = 0.85 end)
 		row.MouseLeave:Connect(function() row.BackgroundTransparency = 1 end)
 		row.MouseButton1Click:Connect(function()
 			selectedIdx = i
@@ -1183,7 +1203,7 @@ local function createDropdown(parent, label, options, defaultIdx, order, onChang
 			onChange(options[selectedIdx])
 			open = false
 			TweenService:Create(listF, TweenInfo.new(0.15), {Size = UDim2.new(1,0,0,0)}):Play()
-			task.delay(0.15, function() listF.Visible = false end)
+			task.delay(0.16, function() listF.Visible = false end)
 		end)
 	end
 
@@ -1193,72 +1213,64 @@ local function createDropdown(parent, label, options, defaultIdx, order, onChang
 	headerBtn.MouseButton1Click:Connect(function()
 		open = not open
 		listF.Visible = true
-		local h = open and math.min(#options * 29, 174) or 0
+		local h = open and math.min(#options * 29, 200) or 0
 		TweenService:Create(listF, TweenInfo.new(0.15), {Size = UDim2.new(1,0,0,h)}):Play()
-		if not open then task.delay(0.15, function() listF.Visible = false end) end
+		if not open then task.delay(0.16, function() listF.Visible = false end) end
 	end)
-
-	return lbl
 end
 
+-- Souris — toutes les options
 local MOUSE_OPTIONS = {
-	"Mouse2 (Clic droit)",
-	"Mouse1 (Clic gauche)",
-	"Mouse3 (Molette)",
+	"Mouse2  —  Clic droit",
+	"Mouse1  —  Clic gauche",
+	"Mouse3  —  Clic molette",
 }
+local function mouseOptToKey(opt)
+	if opt:find("Mouse2") then return "Mouse2"
+	elseif opt:find("Mouse1") then return "Mouse1"
+	else return "Mouse3" end
+end
+
+-- Clavier — liste complète
 local KEY_OPTIONS = {
-	"E","R","T","G","H","X","C","V","Z",
+	-- Lettres courantes
+	"E","R","T","Y","U","G","H","J","K","L",
+	"X","C","V","B","N","M","Z","Q",
+	-- Modificateurs
 	"LeftAlt","RightAlt",
 	"LeftShift","RightShift",
 	"LeftControl","RightControl",
-	"Q","F","J","K","L","N","M",
-	"One","Two","Three","Four",
-	"F1","F2","F3","F4","F5",
-	"Comma","Period","Semicolon",
+	-- Touches fonction
+	"F1","F2","F3","F4","F5","F6","F7","F8",
+	-- Chiffres
+	"One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Zero",
+	-- Pavé numérique
+	"KeypadOne","KeypadTwo","KeypadThree","KeypadFour","KeypadFive",
+	-- Autres
+	"Tab","CapsLock","Space","BackSpace","Delete",
+	"Insert","Home","End","PageUp","PageDown",
+	"Up","Down","Left","Right",
+	"Comma","Period","Semicolon","Quote","Slash","BackSlash",
+	"Minus","Equals","LeftBracket","RightBracket",
 }
 
--- Map option → aimLockKey
-local function optToKey(opt)
-	if opt:find("Mouse2") then return "Mouse2"
-	elseif opt:find("Mouse1") then return "Mouse1"
-	elseif opt:find("Mouse3") then return "Mouse3"
-	else return opt end
-end
-
--- Dropdown Souris
-createDropdown(pages.Perso, "🖱  Touche souris", MOUSE_OPTIONS, 1, 9, function(opt)
-	aimLockKey = optToKey(opt)
+createDropdown(pages.Perso, "🖱  Touche souris", MOUSE_OPTIONS, 1, 10, function(opt)
+	aimLockKey = mouseOptToKey(opt)
 	refreshAimLabel()
-	showNotification("🎯  Aim touche : " .. aimLockKey, 2)
+	showNotification("🎯  Aim : " .. aimLockKey, 2)
 end)
 
--- Dropdown Clavier
-createDropdown(pages.Perso, "⌨  Touche clavier", KEY_OPTIONS, 1, 10, function(opt)
+createDropdown(pages.Perso, "⌨  Touche clavier", KEY_OPTIONS, 1, 11, function(opt)
 	aimLockKey = opt
 	refreshAimLabel()
-	showNotification("🎯  Aim touche : " .. aimLockKey, 2)
+	showNotification("🎯  Aim : " .. aimLockKey, 2)
 end)
 
--- Mode Hold/Toggle
-createBtn(pages.Perso, "🔄  Mode : Hold / Toggle", currentTheme.Button, 11, function()
+createBtn(pages.Perso, "🔄  Mode Hold / Toggle", currentTheme.Button, 12, function()
 	aimLockMode = (aimLockMode == "hold") and "toggle" or "hold"
 	refreshAimLabel()
-	showNotification("🎯  Mode aim : " .. aimLockMode, 2)
+	showNotification("🎯  Mode : " .. aimLockMode, 2)
 end)
-
--- Label état actuel
-local aimKeyLabel = Instance.new("TextLabel", pages.Perso)
-aimKeyLabel.Size = UDim2.new(1, 0, 0, 20)
-aimKeyLabel.BackgroundTransparency = 1
-aimKeyLabel.TextColor3 = currentTheme.SubText
-aimKeyLabel.Font = Enum.Font.Gotham; aimKeyLabel.TextSize = 11
-aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
-aimKeyLabel.TextXAlignment = Enum.TextXAlignment.Left
-aimKeyLabel.LayoutOrder = 12
-
-local function refreshAimLabel()
-	aimKeyLabel.Text = "  Touche : " .. aimLockKey .. "  |  Mode : " .. aimLockMode
-end
 
 createSection(pages.Perso, "📐  Apparence")
 
