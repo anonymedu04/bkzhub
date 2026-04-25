@@ -1842,12 +1842,12 @@ local function startNuke()
 	-- Sons fusée (2 couches pour un effet plus puissant)
 	local snd = Instance.new("Sound", hrp)
 	snd.Name = "NukeSound"
-	snd.SoundId = "rbxassetid://580125779"   -- rocket puissant
+	snd.SoundId = "rbxassetid://84792688181059"   -- rocket puissant
 	snd.Volume = 4; snd.Looped = true; snd:Play()
 
 	local sndBoost = Instance.new("Sound", hrp)
 	sndBoost.Name = "NukeBoost"
-	sndBoost.SoundId = "rbxassetid://14457824"  -- thruster grave
+	sndBoost.SoundId = "rbxassetid://84792688181059"  -- thruster grave
 	sndBoost.Volume = 2.5; sndBoost.Looped = true; sndBoost:Play()
 
 	-- Traînée de feu
@@ -1907,7 +1907,7 @@ createBtn(pages.Perso, "💣  Explosion sur place", currentTheme.Danger, 11, fun
 
 	-- Son d'explosion immédiat (2 couches : impact + basse)
 	local boom1 = Instance.new("Sound", hrp)
-	boom1.SoundId = "rbxassetid://138680390593747"; boom1.Volume = 5
+	boom1.SoundId = "rbxassetid://84792688181059"; boom1.Volume = 5
 	boom1.RollOffMaxDistance = 300; boom1:Play()
 	Debris:AddItem(boom1, 4)
 
