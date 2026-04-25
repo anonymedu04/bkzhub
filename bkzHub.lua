@@ -953,7 +953,7 @@ createToggle(pages.Perso, "🦅  Fly  (WASD + Space/Ctrl)", 5, function(state)
 	if state then enableFly() else disableFly() end
 end)
 
-createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 500, 40, 6, function(val)
+createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 900, 40, 6, function(val)
 	flySpeed = val
 end)
 
