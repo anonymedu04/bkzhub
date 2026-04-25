@@ -1819,7 +1819,7 @@ local function spawnExplosionFX(pos)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then
 		local boom = Instance.new("Sound", hrp)
-		boom.SoundId = "rbxassetid://140127824335694"
+		boom.SoundId = "rbxassetid://84792688181059"
 		boom.Volume = 0; boom.RollOffMaxDistance = 200
 		boom:Play(); Debris:AddItem(boom, 1)
 	end
