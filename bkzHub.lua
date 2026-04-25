@@ -481,7 +481,7 @@ local function playInstantTransmissionFX(position)
 
 	-- Son départ : whoosh puissant
 	local snd1 = Instance.new("Sound", hrp)
-	snd1.SoundId = "rbxassetid://139797353086923"
+	snd1.SoundId = "rbxassetid://126099526912322"
 	snd1.Volume = 2.5; snd1.PlaybackSpeed = 1.3
 	snd1:Play(); Debris:AddItem(snd1, 2)
 
@@ -522,7 +522,7 @@ local function playInstantTransmissionFX(position)
 
 	-- Son impact arrivée
 	local snd2 = Instance.new("Sound", hrp)
-	snd2.SoundId = "rbxassetid://98636533118333"
+	snd2.SoundId = "rbxassetid://135938385687045"
 	snd2.Volume = 2; snd2.PlaybackSpeed = 0.85
 	snd2:Play(); Debris:AddItem(snd2, 2)
 
@@ -566,12 +566,12 @@ UIS.InputBegan:Connect(function(input, gpe)
 		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			local sndTP = Instance.new("Sound", hrp)
-			sndTP.SoundId = "rbxassetid://139797353086923"  -- whoosh téléportation
+			sndTP.SoundId = "rbxassetid://126099526912322"  -- whoosh téléportation
 			sndTP.Volume = 1.5; sndTP.PlaybackSpeed = 1.2
 			sndTP:Play(); Debris:AddItem(sndTP, 2)
 
 			local sndImpact = Instance.new("Sound", hrp)
-			sndImpact.SoundId = "rbxassetid://98636533118333"  -- impact arrivée
+			sndImpact.SoundId = "rbxassetid://135938385687045"  -- impact arrivée
 			sndImpact.Volume = 1; sndImpact.PlaybackSpeed = 0.9
 			task.delay(0.05, function() sndImpact:Play() end)
 			Debris:AddItem(sndImpact, 2)
@@ -1819,7 +1819,7 @@ local function spawnExplosionFX(pos)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then
 		local boom = Instance.new("Sound", hrp)
-		boom.SoundId = "rbxassetid://2248511717"
+		boom.SoundId = "rbxassetid://140127824335694"
 		boom.Volume = 0; boom.RollOffMaxDistance = 200
 		boom:Play(); Debris:AddItem(boom, 1)
 	end
@@ -1907,12 +1907,12 @@ createBtn(pages.Perso, "💣  Explosion sur place", currentTheme.Danger, 11, fun
 
 	-- Son d'explosion immédiat (2 couches : impact + basse)
 	local boom1 = Instance.new("Sound", hrp)
-	boom1.SoundId = "rbxassetid://2248511717"; boom1.Volume = 5
+	boom1.SoundId = "rbxassetid://138680390593747"; boom1.Volume = 5
 	boom1.RollOffMaxDistance = 300; boom1:Play()
 	Debris:AddItem(boom1, 4)
 
 	local boom2 = Instance.new("Sound", hrp)
-	boom2.SoundId = "rbxassetid://3716468774"; boom2.Volume = 3  -- basse explosion
+	boom2.SoundId = "rbxassetid://84792688181059"; boom2.Volume = 3  -- basse explosion
 	boom2.RollOffMaxDistance = 200; boom2:Play()
 	Debris:AddItem(boom2, 3)
 
