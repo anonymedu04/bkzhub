@@ -482,7 +482,7 @@ local function playInstantTransmissionFX(position)
 	-- Son départ : whoosh puissant
 	local snd1 = Instance.new("Sound", hrp)
 	snd1.SoundId = "rbxassetid://126099526912322"
-	snd1.Volume = 2.5; snd1.PlaybackSpeed = 1.3
+	snd1.Volume = 0.5; snd1.PlaybackSpeed = 1
 	snd1:Play(); Debris:AddItem(snd1, 2)
 
 	-- Afterimage fantôme du perso à l'origine
@@ -523,7 +523,7 @@ local function playInstantTransmissionFX(position)
 	-- Son impact arrivée
 	local snd2 = Instance.new("Sound", hrp)
 	snd2.SoundId = "rbxassetid://135938385687045"
-	snd2.Volume = 2; snd2.PlaybackSpeed = 0.85
+	snd2.Volume = 0.5; snd2.PlaybackSpeed = 0.85
 	snd2:Play(); Debris:AddItem(snd2, 2)
 
 	local arrCF = hrp.CFrame
@@ -567,12 +567,12 @@ UIS.InputBegan:Connect(function(input, gpe)
 		if hrp then
 			local sndTP = Instance.new("Sound", hrp)
 			sndTP.SoundId = "rbxassetid://126099526912322"  -- whoosh téléportation
-			sndTP.Volume = 1.5; sndTP.PlaybackSpeed = 1.2
+			sndTP.Volume = 0.5; sndTP.PlaybackSpeed = 1
 			sndTP:Play(); Debris:AddItem(sndTP, 2)
 
 			local sndImpact = Instance.new("Sound", hrp)
 			sndImpact.SoundId = "rbxassetid://135938385687045"  -- impact arrivée
-			sndImpact.Volume = 1; sndImpact.PlaybackSpeed = 0.9
+			sndImpact.Volume = 0.5; sndImpact.PlaybackSpeed = 1
 			task.delay(0.05, function() sndImpact:Play() end)
 			Debris:AddItem(sndImpact, 2)
 		end
