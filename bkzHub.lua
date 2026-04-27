@@ -187,7 +187,7 @@ tabPad.PaddingTop = UDim.new(0, 3); tabPad.PaddingBottom = UDim.new(0, 3)
 -- ================================================
 local tabDefs = {
 	{ name = "Player",   icon = "👤" },
-	{ name = "Personal",    icon = "🔒" },
+	{ name = "Personal", icon = "🔒" },
 	{ name = "ESP",      icon = "👁" },
 	{ name = "World",    icon = "🌍" },
 	{ name = "Settings", icon = "⚙" },
@@ -575,7 +575,7 @@ end)
 -- ================================================
 
 -- ================================================
-createSection(pages.Player, "Ciblage")
+createSection(pages.Player, "Targeting")
 
 -- Player search container (input + refresh button)
 local searchRow = Instance.new("Frame", pages.Player)
@@ -593,7 +593,7 @@ ddFrame.BorderSizePixel = 0
 Instance.new("UICorner", ddFrame).CornerRadius = UDim.new(0, 8)
 
 local searchBox = Instance.new("TextBox", ddFrame)
-searchBox.PlaceholderText = "  👤  Rechercher un joueur..."
+searchBox.PlaceholderText = "  👤  Search for a player..."
 searchBox.Text = ""
 searchBox.Size = UDim2.new(1, -10, 1, 0)
 searchBox.Position = UDim2.new(0, 10, 0, 0)
@@ -722,7 +722,7 @@ UIS.InputBegan:Connect(function(input, gpe)
 	end
 end)
 
--- Refresg button
+-- Refresh button
 refreshBtn.MouseButton1Click:Connect(function()
 	refreshDD()
 end)
@@ -746,7 +746,7 @@ infoPad.PaddingLeft = UDim.new(0, 10)
 infoPad.PaddingTop = UDim.new(0, 6)
 
 local infoName = Instance.new("TextLabel", infoPanel)
-infoName.Text = "Aucun joueur sélectionné"
+infoName.Text = "No player selected"
 infoName.Size = UDim2.new(1, -10, 0, 20)
 infoName.BackgroundTransparency = 1
 infoName.TextColor3 = currentTheme.Text
@@ -779,8 +779,8 @@ local _origSelectPlayer = selectPlayer
 selectPlayer = function(p)
 	_origSelectPlayer(p)
 	infoName.Text = "👤  " .. p.Name .. "  (ID: " .. p.UserId .. ")"
-	local teamName = p.Team and p.Team.Name or "Aucune"
-	infoStats.Text = "🏷  " .. (p.DisplayName ~= p.Name and p.DisplayName or p.Name) .. "   🚩 Équipe: " .. teamName
+	local teamName = p.Team and p.Team.Name or "None"
+	infoStats.Text = "🏷  " .. (p.DisplayName ~= p.Name and p.DisplayName or p.Name) .. "   🚩 Team: " .. teamName
 	local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid")
 	if hum then
 		infoHP.Text = "❤  HP: " .. math.floor(hum.Health) .. " / " .. math.floor(hum.MaxHealth)
@@ -807,7 +807,7 @@ end)
 createBtn(pages.Player, "⏹  Stop Spectate", currentTheme.Button, 4, function()
 	if player.Character then workspace.CurrentCamera.CameraSubject = player.Character:FindFirstChildOfClass("Humanoid") end
 end)
-createBtn(pages.Player, "📍  TP joueur vers moi", currentTheme.Button, 5, function()
+createBtn(pages.Player, "📍  TP Player to Me", currentTheme.Button, 5, function()
 	if not (targetPlayer and targetPlayer.Character and player.Character) then return end
 	local myHRP = player.Character:FindFirstChild("HumanoidRootPart")
 	local theirHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -819,7 +819,7 @@ createBtn(pages.Player, "📍  TP joueur vers moi", currentTheme.Button, 5, func
 		theirHRP.Anchored = wasAnchored
 	end
 end)
-createBtn(pages.Player, "🚀  Me TP vers le joueur", currentTheme.Button, 6, function()
+createBtn(pages.Player, "🚀  TP Me to Player", currentTheme.Button, 6, function()
 	if not (targetPlayer and targetPlayer.Character and player.Character) then return end
 	local myHRP = player.Character:FindFirstChild("HumanoidRootPart")
 	local theirHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -848,13 +848,13 @@ end
 createBtn(pages.Player, "💬  Chat Spy ON/OFF", currentTheme.Button, 7, function()
 	if chatSpyConn then
 		chatSpyConn:Disconnect(); chatSpyConn = nil
-		showNotification("👁  Chat spy désactivé", 2)
+		showNotification("👁  Chat spy disabled", 2)
 	else
 		if targetPlayer then
 			startChatSpy(targetPlayer)
-			showNotification("👁  Chat spy actif sur " .. targetPlayer.Name, 3)
+			showNotification("👁  Chat spy active on " .. targetPlayer.Name, 3)
 		else
-			showNotification("❌  Sélectionne un joueur d'abord", 2)
+			showNotification("❌  Select a player first", 2)
 		end
 	end
 end)
@@ -862,7 +862,7 @@ end)
 -- ================================================
 
 -- ================================================
-createSection(pages.Perso, "🏃  Mouvement")
+createSection(pages.Personalnal, "🏃  Movement")
 
 local savedWalkSpeed = 16
 local savedJumpPower = 50
@@ -880,17 +880,17 @@ player.CharacterAdded:Connect(function(char)
 	applyMovement(char)
 end)
 
-createToggle(pages.Perso, "⚡  Goku TP (F + souris)", 1, function(state)
+createToggle(pages.Personal, "⚡  Goku TP (F + Mouse)", 1, function(state)
 	gokuMode = state
 end)
 
-createSlider(pages.Perso, "🏃  Vitesse de marche", 16, 250, 16, 2, function(val)
+createSlider(pages.Personal, "🏃  Walk Speed", 16, 250, 16, 2, function(val)
 	savedWalkSpeed = val
 	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if hum then hum.WalkSpeed = val end
 end)
 
-createSlider(pages.Perso, "🦘  Hauteur de saut", 7, 500, 50, 3, function(val)
+createSlider(pages.Personal, "🦘  Jump Height", 7, 500, 50, 3, function(val)
 	savedJumpPower = val
 	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if hum then
@@ -899,11 +899,11 @@ createSlider(pages.Perso, "🦘  Hauteur de saut", 7, 500, 50, 3, function(val)
 	end
 end)
 
-createToggle(pages.Perso, "🧊  Freeze (immobile)", 4, function(state)
+createToggle(pages.Personal, "🧊  Freeze (no move)", 4, function(state)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then hrp.Anchored = state end
 end)
-createSection(pages.Perso, "🦅  Vol")
+createSection(pages.Personalnal, "🦅  Fly")
 
 local flyEnabled = false
 local flyBodyVel, flyBodyGyro
@@ -957,18 +957,18 @@ local function disableFly()
 	end
 end
 
-createToggle(pages.Perso, "🦅  Fly  (WASD + Space/Ctrl)", 5, function(state)
+createToggle(pages.Personal, "🦅  Fly  (WASD + Space/Ctrl)", 5, function(state)
 	flyEnabled = state
 	if state then enableFly() else disableFly() end
 end)
 
-createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 5000, 40, 6, function(val)
+createSlider(pages.Personal, "🦅  Fly Speed", 10, 5000, 40, 6, function(val)
 	flySpeed = val
 end)
 
-createSection(pages.Perso, "👁  Collision & Visuel")
+createSection(pages.Personalnal, "👁  Collision & Visual")
 
-createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state)
+createToggle(pages.Personal, "🕶  Noclip (walk through walls)", 5, function(state)
 	if state then
 		RunService:BindToRenderStep("Noclip", Enum.RenderPriority.Character.Value + 1, function()
 			local char = player.Character
@@ -990,7 +990,7 @@ createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state
 	end
 end)
 
-createSection(pages.Perso, "🛡  Survie")
+createSection(pages.Personalnal, "🛡  Survival")
 
 -- God Mode — 3 methods
 local godConn = nil
@@ -1010,7 +1010,7 @@ local function applyGodMethod(hum)
 	end
 end
 
-createToggle(pages.Perso, "🛡  God Mode (invincible)", 6, function(state)
+createToggle(pages.Personal, "🛡  God Mode (invincible)", 6, function(state)
 	if godConn then godConn:Disconnect(); godConn = nil end
 	if state then
 		godConn = RunService.Heartbeat:Connect(function()
@@ -1035,14 +1035,14 @@ createToggle(pages.Perso, "🛡  God Mode (invincible)", 6, function(state)
 	end
 end)
 
-createBtn(pages.Perso, "🔧  God méthode : " .. godMethod .. "/3", currentTheme.Button, 7, function()
+createBtn(pages.Personal, "🔧  God méthode : " .. godMethod .. "/3", currentTheme.Button, 7, function()
 	godMethod = (godMethod % 3) + 1
-	showNotification("🛡  God méthode : " .. godMethod, 2)
+	showNotification("🛡  God method: " .. godMethod, 2)
 end)
 
 -- Infinite Jump
 local jumpConn = nil
-createToggle(pages.Perso, "🦘  Infinite Jump", 7, function(state)
+createToggle(pages.Personal, "🦘  Infinite Jump", 7, function(state)
 	if state then
 		jumpConn = UIS.JumpRequest:Connect(function()
 			local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -1053,7 +1053,7 @@ createToggle(pages.Perso, "🦘  Infinite Jump", 7, function(state)
 	end
 end)
 
-createSection(pages.Perso, "🎯  Combat")
+createSection(pages.Personalnal, "🎯  Combat")
 
 -- ================================================
 
@@ -1068,9 +1068,9 @@ local aimFOV       = 250
 
 -- All possible mouse buttons
 local MOUSE_KEYS = {
-	{ label = "Clic Droit  (Mouse2)",   id = "Mouse2"  },
-	{ label = "Clic Gauche  (Mouse1)",  id = "Mouse1"  },
-	{ label = "Clic Molette  (Mouse3)", id = "Mouse3"  },
+	{ label = "Right Click  (Mouse2)",   id = "Mouse2"  },
+	{ label = "Left Click  (Mouse1)",  id = "Mouse1"  },
+	{ label = "Middle Click  (Mouse3)", id = "Mouse3"  },
 }
 
 -- All valid Roblo keyboard keys (KeyCode.Name)
@@ -1215,10 +1215,10 @@ end)
 -- ================================================
 
 -- ================================================
-createSection(pages.Perso, "🎯  Aim Lock")
+createSection(pages.Personalnal, "🎯  Aim Lock")
 
 -- Declaration BEFORE use
-local aimStatusLabel = Instance.new("TextLabel", pages.Perso)
+local aimStatusLabel = Instance.new("TextLabel", pages.Personal)
 aimStatusLabel.Size  = UDim2.new(1, 0, 0, 18)
 aimStatusLabel.BackgroundTransparency = 1
 aimStatusLabel.TextColor3 = currentTheme.SubText
@@ -1227,40 +1227,40 @@ aimStatusLabel.TextSize = 11
 aimStatusLabel.TextXAlignment = Enum.TextXAlignment.Left
 aimStatusLabel.LayoutOrder = 100
 local function updateAimStatus()
-	aimStatusLabel.Text = "  Touche: " .. aimKey
+	aimStatusLabel.Text = "  Key: " .. aimKey
 		.. "   Mode: " .. aimMode
 		.. "   Smooth: " .. math.floor(aimSmooth * 100) .. "%"
 end
 updateAimStatus()
 
 -- Main Toggle
-createToggle(pages.Perso, "🎯  Aim Lock ON / OFF", 101, function(state)
+createToggle(pages.Personal, "🎯  Aim Lock ON / OFF", 101, function(state)
 	aimEnabled = state
 	if state then startAim() else stopAim() end
 end)
 
 -- Slider smooth (aiming speed)
-createSlider(pages.Perso, "🎚  Smooth (douceur)", 1, 30, 8, 102, function(val)
+createSlider(pages.Personal, "🎚  Smooth (aim speed)", 1, 30, 8, 102, function(val)
 	aimSmooth = val / 100
 	updateAimStatus()
 end)
 
 -- Slider FOV
-createSlider(pages.Perso, "🔵  FOV (rayon pixels)", 50, 600, 250, 103, function(val)
+createSlider(pages.Personal, "🔵  FOV (radius pixels)", 50, 600, 250, 103, function(val)
 	aimFOV = val
 end)
 
 -- Mode Hold / Toggle
-createBtn(pages.Perso, "🔄  Mode : " .. aimMode, currentTheme.Button, 104, function(btn)
+createBtn(pages.Personal, "🔄  Mode: " .. aimMode, currentTheme.Button, 104, function(btn)
 	aimMode = (aimMode == "hold") and "toggle" or "hold"
 	updateAimStatus()
-	showNotification("🎯  Mode : " .. aimMode, 2)
+	showNotification("🎯  Mode: " .. aimMode, 2)
 end)
 
-local methodNames = {"1 - Cam directe", "2 - Cam Scriptable", "3 - HRP orient"}
-createBtn(pages.Perso, "🔧  Méthode : " .. methodNames[aimMethod], currentTheme.Button, 105, function()
+local methodNames = {"1 - Direct Cam", "2 - Scriptable Cam", "3 - HRP Orient"}
+createBtn(pages.Personal, "🔧  Method: " .. methodNames[aimMethod], currentTheme.Button, 105, function()
 	aimMethod = (aimMethod % 3) + 1
-	showNotification("🎯  Méthode : " .. methodNames[aimMethod], 2)
+	showNotification("🎯  Method: " .. methodNames[aimMethod], 2)
 end)
 
 -- Generic dropdown (declared here, used for mouse and keyboard)
@@ -1341,19 +1341,19 @@ end
 local MOUSE_LABELS = {}
 for _, m in ipairs(MOUSE_KEYS) do table.insert(MOUSE_LABELS, m.label) end
 
-mkDropdown(pages.Perso, "🖱  Souris", MOUSE_LABELS, 1, 105, function(lbl)
+mkDropdown(pages.Personal, "🖱  Mouse", MOUSE_LABELS, 1, 105, function(lbl)
 	for _, m in ipairs(MOUSE_KEYS) do
 		if m.label == lbl then aimKey = m.id; break end
 	end
 	updateAimStatus()
 end)
 
-mkDropdown(pages.Perso, "⌨  Clavier", KEYBOARD_KEYS, 1, 106, function(key)
+mkDropdown(pages.Personal, "⌨  Keyboard", KEYBOARD_KEYS, 1, 106, function(key)
 	aimKey = key
 	updateAimStatus()
 end)
 
-createSection(pages.Perso, "📐  Apparence")
+createSection(pages.Personalnal, "📐  Appearance")
 
 local currentScale = 1.0
 
@@ -1383,20 +1383,20 @@ player.CharacterAdded:Connect(function(char)
 	applyScale(currentScale * 100)
 end)
 
-createSlider(pages.Perso, "📐  Taille du personnage", 50, 200, 100, 9, function(val)
+createSlider(pages.Personal, "📐  Character Size", 50, 200, 100, 9, function(val)
 	applyScale(val)
 end)
 
 -- ================================================
 
 -- ================================================
-createSection(pages.World, "☀  Environnement")
+createSection(pages.World, "☀  Environment")
 
 local shader = nil
 for _, v in pairs(Lighting:GetChildren()) do if v.Name == "AdminShader" then shader = v; break end end
 if not shader then shader = Instance.new("ColorCorrectionEffect", Lighting); shader.Name = "AdminShader"; shader.Enabled = false end
 
-createToggle(pages.World, "🎨  Shaders cinématiques", 1, function(state)
+createToggle(pages.World, "🎨  Cinematic Shaders", 1, function(state)
 	shader.Enabled = state
 	if state then
 		shader.Brightness = -0.05; shader.Contrast = 0.08
@@ -1404,7 +1404,7 @@ createToggle(pages.World, "🎨  Shaders cinématiques", 1, function(state)
 	end
 end)
 
-createToggle(pages.World, "🌙  Mode nuit", 2, function(state)
+createToggle(pages.World, "🌙  Night Mode", 2, function(state)
 	if state then
 		TweenService:Create(Lighting, TweenInfo.new(1.5), {ClockTime=0, Brightness=0.5, Ambient=Color3.fromRGB(20,20,50)}):Play()
 	else
@@ -1412,11 +1412,7 @@ createToggle(pages.World, "🌙  Mode nuit", 2, function(state)
 	end
 end)
 
-createSlider(pages.World, "☀  Heure du jour", 0, 24, 14, 3, function(val)
-	Lighting.ClockTime = val
-end)
-
-createToggle(pages.World, "🌈  Ciel Rainbow", 4, function(state)
+createToggle(pages.World, "🌈  Rainbow Sky", 4, function(state)
 	if state then
 		local hue = 0
 		RunService:BindToRenderStep("RainbowSky", 1, function()
@@ -1442,7 +1438,7 @@ local function getAtmo()
 	return a
 end
 
-createToggle(pages.World, "🌫  Brouillard dense", 5, function(state)
+createToggle(pages.World, "🌫  Dense Fog", 5, function(state)
 	local atmo = getAtmo()
 	TweenService:Create(atmo, TweenInfo.new(1.5), {
 		Density = state and 0.85 or 0.3,
@@ -1450,7 +1446,7 @@ createToggle(pages.World, "🌫  Brouillard dense", 5, function(state)
 	}):Play()
 end)
 
-createToggle(pages.World, "☁  Brouillard léger", 6, function(state)
+createToggle(pages.World, "☁  Light Fog", 6, function(state)
 	local atmo = getAtmo()
 	TweenService:Create(atmo, TweenInfo.new(1.5), {
 		Density = state and 0.5 or 0.3,
@@ -1458,7 +1454,7 @@ createToggle(pages.World, "☁  Brouillard léger", 6, function(state)
 end)
 
 -- Rain: ParticleEmitter via rbxassetid known + its ambiance
-createToggle(pages.World, "🌧  Pluie", 7, function(state)
+createToggle(pages.World, "🌧  Rain", 7, function(state)
 	RunService:UnbindFromRenderStep("AdminRain")
 	local old = workspace:FindFirstChild("AdminRain")
 	if old then old:Destroy() end
@@ -1494,7 +1490,7 @@ createToggle(pages.World, "🌧  Pluie", 7, function(state)
 end)
 
 -- Snow: only one instance, correct texture
-createToggle(pages.World, "❄  Neige", 8, function(state)
+createToggle(pages.World, "❄  Snow", 8, function(state)
 	RunService:UnbindFromRenderStep("AdminSnow")
 	local old = workspace:FindFirstChild("AdminSnow")
 	if old then old:Destroy() end
@@ -1539,7 +1535,7 @@ createToggle(pages.World, "❄  Neige", 8, function(state)
 	end
 end)
 
-createToggle(pages.World, "🌅  Coucher de soleil", 9, function(state)
+createToggle(pages.World, "🌅  Sunset", 9, function(state)
 	if state then
 		TweenService:Create(Lighting, TweenInfo.new(2), {
 			ClockTime = 18, Brightness = 1.2,
@@ -1559,13 +1555,13 @@ createToggle(pages.World, "🌅  Coucher de soleil", 9, function(state)
 	end
 end)
 
-createSection(pages.World, "⏩  Temps")
+createSection(pages.World, "⏩  Time")
 
-createSlider(pages.World, "☀  Heure du jour", 0, 24, 14, 10, function(val)
+createSlider(pages.World, "☀  Time of Day", 0, 24, 14, 10, function(val)
 	Lighting.ClockTime = val
 end)
 
-createSlider(pages.World, "⏩  Vitesse du temps (x)", 0, 5, 0, 11, function(val)
+createSlider(pages.World, "⏩  Time Speed (x)", 0, 5, 0, 11, function(val)
 	RunService:UnbindFromRenderStep("AdminTimeSpeed")
 	if val > 0 then
 		RunService:BindToRenderStep("AdminTimeSpeed", 1, function(dt)
@@ -1574,12 +1570,12 @@ createSlider(pages.World, "⏩  Vitesse du temps (x)", 0, 5, 0, 11, function(val
 	end
 end)
 
-createSection(pages.World, "⚙  Physique")
+createSection(pages.World, "⚙  Physics")
 
-createSlider(pages.World, "🌍  Gravité", 0, 300, 196, 12, function(val)
+createSlider(pages.World, "🌍  Gravity", 0, 300, 196, 12, function(val)
 	workspace.Gravity = val
 end)
-createBtn(pages.World, "↩  Reset gravité", currentTheme.Button, 13, function()
+createBtn(pages.World, "↩  Reset Gravity", currentTheme.Button, 13, function()
 	workspace.Gravity = 196
 end)
 
@@ -1621,27 +1617,27 @@ local function applyTheme(t)
 	end
 end
 
-createSection(pages.Settings, "🎨  Thème")
-createBtn(pages.Settings, "🌑  Sombre",  currentTheme.Button, 1, function() applyTheme(Themes.Dark)  end)
-createBtn(pages.Settings, "🌕  Clair",   currentTheme.Button, 2, function() applyTheme(Themes.Light) end)
+createSection(pages.Settings, "🎨  Theme")
+createBtn(pages.Settings, "🌑  Dark",  currentTheme.Button, 1, function() applyTheme(Themes.Dark)  end)
+createBtn(pages.Settings, "🌕  Light",   currentTheme.Button, 2, function() applyTheme(Themes.Light) end)
 createBtn(pages.Settings, "💠  Cyber",   currentTheme.Button, 3, function() applyTheme(Themes.Cyber) end)
-createBtn(pages.Settings, "🔴  Rouge",   currentTheme.Button, 4, function() applyTheme(Themes.Rouge) end)
-createBtn(pages.Settings, "🟢  Vert",    currentTheme.Button, 5, function() applyTheme(Themes.Vert)  end)
+createBtn(pages.Settings, "🔴  Red",   currentTheme.Button, 4, function() applyTheme(Themes.Rouge) end)
+createBtn(pages.Settings, "🟢  Green",    currentTheme.Button, 5, function() applyTheme(Themes.Vert)  end)
 
-createSection(pages.Settings, "📐  Taille")
-createBtn(pages.Settings, "➕  Agrandir (+40)", currentTheme.Button, 3, function()
+createSection(pages.Settings, "📐  Size")
+createBtn(pages.Settings, "➕  Enlarge (+40)", currentTheme.Button, 3, function()
 	applyMenuSize(menuW + 40, menuH + 40)
 end)
-createBtn(pages.Settings, "➖  Réduire (-40)", currentTheme.Button, 4, function()
+createBtn(pages.Settings, "➖  Reduce (-40)", currentTheme.Button, 4, function()
 	applyMenuSize(math.max(280, menuW - 40), math.max(380, menuH - 40))
 end)
-createBtn(pages.Settings, "↔  +Largeur seulement", currentTheme.Button, 5, function()
+createBtn(pages.Settings, "↔  +Width Only", currentTheme.Button, 5, function()
 	applyMenuSize(menuW + 40, menuH)
 end)
-createBtn(pages.Settings, "↕  +Hauteur seulement", currentTheme.Button, 6, function()
+createBtn(pages.Settings, "↕  +Height Only", currentTheme.Button, 6, function()
 	applyMenuSize(menuW, menuH + 40)
 end)
-createBtn(pages.Settings, "↩  Reset taille", currentTheme.Button, 7, function()
+createBtn(pages.Settings, "↩  Reset Size", currentTheme.Button, 7, function()
 	applyMenuSize(360, 480)
 end)
 createSection(pages.Settings, "💾  Configuration")
@@ -1657,8 +1653,8 @@ local function getConfig()
 		end)(),
 		menuW     = menuW,
 		menuH     = menuH,
-		aimKey    = aimLockKey,
-		aimMode   = aimLockMode,
+		aimKey    = aimKey,
+		aimMode   = aimMode,
 		flySpeed  = flySpeed,
 	}
 end
@@ -1666,30 +1662,30 @@ end
 local function applyConfig(cfg)
 	if cfg.theme and Themes[cfg.theme] then applyTheme(Themes[cfg.theme]) end
 	if cfg.menuW and cfg.menuH then applyMenuSize(cfg.menuW, cfg.menuH) end
-	if cfg.aimKey  then aimLockKey  = cfg.aimKey  end
-	if cfg.aimMode then aimLockMode = cfg.aimMode  end
+	if cfg.aimKey  then aimKey  = cfg.aimKey  end
+	if cfg.aimMode then aimMode = cfg.aimMode  end
 	if cfg.flySpeed then flySpeed   = cfg.flySpeed end
-	refreshAimLabel()
+	updateAimStatus()
 end
 
 local function saveConfig()
 	if not writefile then
-		showNotification("❌  writefile non disponible", 3); return
+		showNotification("❌  writefile not available", 3); return
 	end
 	local ok, err = pcall(function()
 		local data = game:GetService("HttpService"):JSONEncode(getConfig())
 		writefile(CONFIG_FILE, data)
 	end)
 	if ok then
-		showNotification("✅  Config sauvegardée !", 3)
+		showNotification("✅  Config saved!", 3)
 	else
-		showNotification("❌  Erreur sauvegarde : " .. tostring(err), 4)
+		showNotification("❌  Save error: " .. tostring(err), 4)
 	end
 end
 
 local function loadConfig()
 	if not readfile then
-		showNotification("❌  readfile non disponible", 3); return
+		showNotification("❌  readfile not available", 3); return
 	end
 	local ok, result = pcall(function()
 		local raw = readfile(CONFIG_FILE)
@@ -1697,33 +1693,33 @@ local function loadConfig()
 	end)
 	if ok and result then
 		applyConfig(result)
-		showNotification("✅  Config chargée !", 3)
+		showNotification("✅  Config loaded!", 3)
 	else
-		showNotification("❌  Aucune config trouvée", 3)
+		showNotification("❌  None config trouvée", 3)
 	end
 end
 
-createBtn(pages.Settings, "💾  Sauvegarder la config", currentTheme.Success, 20, saveConfig)
-createBtn(pages.Settings, "📂  Charger la config", currentTheme.Button,  21, loadConfig)
-createBtn(pages.Settings, "🗑  Reset config", currentTheme.Danger, 22, function()
+createBtn(pages.Settings, "💾  Save Config", currentTheme.Success, 20, saveConfig)
+createBtn(pages.Settings, "📂  Load Config", currentTheme.Button,  21, loadConfig)
+createBtn(pages.Settings, "🗑  Reset Config", currentTheme.Danger, 22, function()
 	applyTheme(Themes.Dark)
 	applyMenuSize(360, 480)
-	aimLockKey = "Mouse2"; aimLockMode = "hold"; flySpeed = 40
-	refreshAimLabel()
-	showNotification("↩  Config réinitialisée", 2)
+	aimKey = "Mouse2"; aimMode = "hold"; flySpeed = 40
+	updateAimStatus()
+	showNotification("↩  Config reset", 2)
 end)
 
-createSlider(pages.Settings, "🔲  Opacité du menu", 20, 100, 100, 8, function(val)
+createSlider(pages.Settings, "🔲  Menu Opacity", 20, 100, 100, 8, function(val)
 	main.BackgroundTransparency = 1 - (val / 100)
 end)
 
-createBtn(pages.Settings, "🏠  Recentrer le menu", currentTheme.Button, 9, function()
+createBtn(pages.Settings, "🏠  Recenter Menu", currentTheme.Button, 9, function()
 	main.Position = UDim2.new(0.5, -menuW/2, 0.5, -menuH/2)
 end)
 
 createSection(pages.Settings, "ℹ  Info")
 local infoLbl = Instance.new("TextLabel", pages.Settings)
-infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Slide anywhere → Move\n🌐 вκ乙 HUB v2.6  •  " .. player.Name
+infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v2.6  •  " .. player.Name
 infoLbl.Size = UDim2.new(1, 0, 0, 60)
 infoLbl.BackgroundTransparency = 1
 infoLbl.TextColor3 = currentTheme.SubText
@@ -1979,12 +1975,12 @@ local function stopNuke()
 end
 
 -- Toggle Nuke on the Personal page
-createSection(pages.Perso, "💥  Chaos & Fun")
-createToggle(pages.Perso, "🚀  NUKE MODE  (propulsion + explosion)", 10, function(state)
+createSection(pages.Personalnal, "💥  Chaos & Fun")
+createToggle(pages.Personal, "🚀  NUKE MODE  (propulsion + explosion)", 10, function(state)
 	nukeEnabled = state
 	if state then startNuke() else stopNuke() end
 end)
-createBtn(pages.Perso, "💣  Explosion sur place", currentTheme.Danger, 11, function()
+createBtn(pages.Personal, "💣  Explode in Place", currentTheme.Danger, 11, function()
 	local char = player.Character
 	local hrp  = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
@@ -2010,7 +2006,7 @@ createBtn(pages.Perso, "💣  Explosion sur place", currentTheme.Danger, 11, fun
 		end)
 	end
 end)
-createBtn(pages.Perso, "🔄  Reset personnage", currentTheme.Button, 12, function()
+createBtn(pages.Personal, "🔄  Reset Character", currentTheme.Button, 12, function()
 	if player.Character then
 		local hum = player.Character:FindFirstChildOfClass("Humanoid")
 		if hum then hum.Health = 0 end
@@ -2025,6 +2021,7 @@ local espState = {
 	health    = false,
 	distance  = false,
 	tracers   = false,
+	snaplines = false,
 	headDots  = false,
 	skeletons = false,
 	chams     = false,
@@ -2298,15 +2295,15 @@ end
 -- Helper dropdown color ESP
 local function createColorDropdown(parent, label, order, defaultColor, onChange)
 	local colors = {
-		{"Rouge",  Color3.fromRGB(255,60,60)},
+		{"Red",    Color3.fromRGB(255,60,60)},
 		{"Orange", Color3.fromRGB(255,140,30)},
-		{"Jaune",  Color3.fromRGB(255,220,50)},
-		{"Vert",   Color3.fromRGB(50,220,100)},
+		{"Yellow", Color3.fromRGB(255,220,50)},
+		{"Green",  Color3.fromRGB(50,220,100)},
 		{"Cyan",   Color3.fromRGB(0,210,255)},
-		{"Bleu",   Color3.fromRGB(80,160,255)},
-		{"Violet", Color3.fromRGB(180,80,255)},
-		{"Blanc",  Color3.fromRGB(240,240,240)},
-		{"Rose",   Color3.fromRGB(255,100,180)},
+		{"Blue",   Color3.fromRGB(80,160,255)},
+		{"Purple", Color3.fromRGB(180,80,255)},
+		{"White",  Color3.fromRGB(240,240,240)},
+		{"Pink",   Color3.fromRGB(255,100,180)},
 	}
 	local selected = defaultColor
 	local open = false
@@ -2403,49 +2400,49 @@ local function createColorDropdown(parent, label, order, defaultColor, onChange)
 end
 
 -- UI ESP in pages.ESP
-createSection(pages.ESP, "⚡  Raccourcis")
-createBtn(pages.ESP, "⚡  Tout activer", currentTheme.Accent, 0, function()
+createSection(pages.ESP, "⚡  Shortcuts")
+createBtn(pages.ESP, "⚡  Enable All", currentTheme.Accent, 0, function()
 	for k in pairs(espState) do espState[k] = true end
 	refreshAllESP()
 end)
-createBtn(pages.ESP, "❌  Tout désactiver", currentTheme.Danger, 1, function()
+createBtn(pages.ESP, "❌  Disable All", currentTheme.Danger, 1, function()
 	for k in pairs(espState) do espState[k] = false end
 	for _, p in ipairs(Players:GetPlayers()) do clearESPFor(p) end
 end)
 
-createSection(pages.ESP, "👤  Affichage joueurs")
+createSection(pages.ESP, "👤  Player Display")
 createToggle(pages.ESP, "📦  Boxes", 2, function(s) toggleESP("boxes", s) end)
-createToggle(pages.ESP, "🏷  Noms + tag équipe", 3, function(s) toggleESP("names", s) end)
-createToggle(pages.ESP, "❤  Santé (texte)", 4, function(s) toggleESP("health", s) end)
-createToggle(pages.ESP, "📊  Barre de santé", 5, function(s) toggleESP("healthBar", s) end)
+createToggle(pages.ESP, "🏷  Names + Team Tag", 3, function(s) toggleESP("names", s) end)
+createToggle(pages.ESP, "❤  Health (text)", 4, function(s) toggleESP("health", s) end)
+createToggle(pages.ESP, "📊  Health Bar", 5, function(s) toggleESP("healthBar", s) end)
 createToggle(pages.ESP, "📏  Distance", 6, function(s) toggleESP("distance", s) end)
 
-createSection(pages.ESP, "🎨  Visuel avancé")
+createSection(pages.ESP, "🎨  Advanced Visual")
 createToggle(pages.ESP, "🔴  Head Dots", 7, function(s) toggleESP("headDots", s) end)
-createToggle(pages.ESP, "💀  Squelette", 8, function(s) toggleESP("skeletons", s) end)
+createToggle(pages.ESP, "💀  Skeleton", 8, function(s) toggleESP("skeletons", s) end)
 createToggle(pages.ESP, "🔆  Chams (Highlight)", 9, function(s) toggleESP("chams", s) end)
 createToggle(pages.ESP, "🎯  Tracers", 10, function(s) toggleESP("tracers", s) end)
 createToggle(pages.ESP, "🔫  Snaplines", 11, function(s) toggleESP("snaplines", s) end)
 
-createSection(pages.ESP, "🗺  Objets au sol")
-createToggle(pages.ESP, "🔫  ESP Armes / Outils", 14, function(s)
+createSection(pages.ESP, "🗺  Ground Items")
+createToggle(pages.ESP, "🔫  ESP Weapons / Tools", 14, function(s)
 	espState.items = s
 	refreshItemESP()
 end)
 
-createSection(pages.ESP, "🎨  Couleurs")
-createColorDropdown(pages.ESP, "🔴  Couleur Ennemis", 20,
+createSection(pages.ESP, "🎨  Colors")
+createColorDropdown(pages.ESP, "🔴  Enemy Color", 20,
 	Color3.fromRGB(255,60,60),
 	function(c) ESP_COLOR_ENEMY = c; refreshAllESP() end
 )
-createColorDropdown(pages.ESP, "🔵  Couleur Alliés", 21,
+createColorDropdown(pages.ESP, "🔵  Ally Color", 21,
 	Color3.fromRGB(80,160,255),
 	function(c) ESP_COLOR_ALLY = c; refreshAllESP() end
 )
 
 -- OTHER PAGE — Credits
 -- ================================================
-createSection(pages.Autre, "👑  Crédits")
+createSection(pages.Other, "👑  Credits")
 
 local credits = {
 	{"👑  Owner","вκ乙"},
@@ -2453,7 +2450,7 @@ local credits = {
 }
 
 for i, entry in ipairs(credits) do
-	local row = Instance.new("Frame", pages.Autre)
+	local row = Instance.new("Frame", pages.Other)
 	row.Size = UDim2.new(1, 0, 0, 44)
 	row.BackgroundColor3 = currentTheme.Panel
 	row.BorderSizePixel = 0
@@ -2485,8 +2482,8 @@ for i, entry in ipairs(credits) do
 	nameLbl.TextWrapped = true
 end
 
-createSection(pages.Autre, "ℹ  Version")
-local verLabel = Instance.new("TextLabel", pages.Autre)
+createSection(pages.Other, "ℹ  Version")
+local verLabel = Instance.new("TextLabel", pages.Other)
 verLabel.Size = UDim2.new(1, 0, 0, 40)
 verLabel.BackgroundTransparency = 1
 verLabel.Text = "🌐 вκ乙 HUB  v2.6\n👉𝐁 Press [B] to open/close"
@@ -2495,27 +2492,7 @@ verLabel.Font = Enum.Font.Gotham
 verLabel.TextSize = 11
 verLabel.TextWrapped = true
 verLabel.LayoutOrder = 99
-	-- Listening to characters' arrival/departure
-	Players.PlayerAdded:Connect(function(p)
-		p.CharacterAdded:Connect(function() task.wait(1); buildESPFor(p) end)
-	end)
-	Players.PlayerRemoving:Connect(function(p) clearESPFor(p) end)
-
-	-- Loop update distance
-	task.spawn(function()
-		while true do
-			task.wait(0.5)
-			if espState.distance then updateDistances() end
-		end
-	end)
-
-	-- Rebuild if character respawns
-	for _, p in ipairs(Players:GetPlayers()) do
-		if p ~= player then
-			p.CharacterAdded:Connect(function() task.wait(1); buildESPFor(p) end)
-			buildESPFor(p)
-		end
-	end
+	-- ESP initialized by startESP() below
 
 
 -- Start the ESP loop
@@ -2551,7 +2528,7 @@ task.spawn(function()
 		end)
 		if ok and result then
 			applyConfig(result)
-			showNotification("📂 Config loaded automatically !", 3)
+			showNotification("📂 Config loaded automatically!", 3)
 		end
 	end
 end)
