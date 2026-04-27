@@ -953,11 +953,14 @@ createToggle(pages.Perso, "🦅  Fly  (WASD + Space/Ctrl)", 5, function(state)
 	if state then enableFly() else disableFly() end
 end)
 
-createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 900, 40, 6, function(val)
+createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 200, 40, 6, function(val)
 	flySpeed = val
 end)
 
 createSection(pages.Perso, "👁  Collision & Visuel")
+
+local noclipSpeed = 50
+local noclipBV = nil
 
 createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state)
 	if state then
@@ -965,15 +968,29 @@ createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state
 			local char = player.Character
 			if not char then return end
 			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-					part.CanCollide = false
-				end
+				if part:IsA("BasePart") then part.CanCollide = false end
 			end
+			-- Mouvement directionnel libre
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if hrp then hrp.CanCollide = false end
+			if not hrp then return end
+			if not noclipBV or not noclipBV.Parent then
+				noclipBV = Instance.new("BodyVelocity", hrp)
+				noclipBV.Name = "NoclipBV"
+				noclipBV.MaxForce = Vector3.new(1e6,1e6,1e6)
+			end
+			local cam = workspace.CurrentCamera
+			local dir = Vector3.zero
+			if UIS:IsKeyDown(Enum.KeyCode.W) then dir = dir + cam.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.S) then dir = dir - cam.CFrame.LookVector end
+			if UIS:IsKeyDown(Enum.KeyCode.A) then dir = dir - cam.CFrame.RightVector end
+			if UIS:IsKeyDown(Enum.KeyCode.D) then dir = dir + cam.CFrame.RightVector end
+			if UIS:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0,1,0) end
+			if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0,1,0) end
+			noclipBV.Velocity = dir.Magnitude > 0 and dir.Unit * noclipSpeed or Vector3.zero
 		end)
 	else
 		RunService:UnbindFromRenderStep("Noclip")
+		if noclipBV then noclipBV:Destroy(); noclipBV = nil end
 		local char = player.Character
 		if char then
 			for _, part in ipairs(char:GetDescendants()) do
@@ -981,6 +998,10 @@ createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state
 			end
 		end
 	end
+end)
+
+createSlider(pages.Perso, "💨  Vitesse Noclip", 10, 5000, 50, 6, function(val)
+	noclipSpeed = val
 end)
 
 createSection(pages.Perso, "🛡  Survie")
@@ -1100,7 +1121,43 @@ local function getTarget()
 	return best
 end
 
--- Boucle aim : lerp doux vers la cible
+-- Boucle aim : 3 méthodes alternatives selon le jeu
+-- Méthode 1 : cam.CFrame direct (marche sur la plupart des jeux)
+-- Méthode 2 : mouse.Move simulation via UserInputService
+-- Méthode 3 : HumanoidRootPart CFrame orient vers cible (fallback)
+local aimMethod = 1   -- méthode active
+
+local function applyAim(head)
+	local cam = workspace.CurrentCamera
+
+	if aimMethod == 1 then
+		-- Direct cam.CFrame lerp
+		local targetCF = CFrame.new(cam.CFrame.Position, head.Position)
+		cam.CFrame = cam.CFrame:Lerp(targetCF, aimSmooth)
+
+	elseif aimMethod == 2 then
+		-- Via CameraType lock + LookAt
+		local prev = cam.CameraType
+		cam.CameraType = Enum.CameraType.Scriptable
+		local targetCF = CFrame.new(cam.CFrame.Position, head.Position)
+		cam.CFrame = cam.CFrame:Lerp(targetCF, aimSmooth)
+		cam.CameraType = prev
+
+	elseif aimMethod == 3 then
+		-- Rotation HRP vers cible (utile si cam est bloquée)
+		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			local dir = (head.Position - hrp.Position) * Vector3.new(1, 0, 1)
+			if dir.Magnitude > 0.1 then
+				hrp.CFrame = hrp.CFrame:Lerp(
+					CFrame.new(hrp.Position, hrp.Position + dir),
+					aimSmooth * 2
+				)
+			end
+		end
+	end
+end
+
 local function startAim()
 	if aimConn then return end
 	aimConn = RunService.RenderStepped:Connect(function()
@@ -1109,10 +1166,7 @@ local function startAim()
 		if not (t and t.Character) then return end
 		local head = t.Character:FindFirstChild("Head")
 		if not head then return end
-		local cam = workspace.CurrentCamera
-		local targetCF = CFrame.new(cam.CFrame.Position, head.Position)
-		-- Lerp doux — aimSmooth contrôle la vitesse
-		cam.CFrame = cam.CFrame:Lerp(targetCF, aimSmooth)
+		pcall(applyAim, head)   -- pcall = si une méthode crash, pas de freeze
 	end)
 end
 
@@ -1181,6 +1235,12 @@ createBtn(pages.Perso, "🔄  Mode : " .. aimMode, currentTheme.Button, 104, fun
 	aimMode = (aimMode == "hold") and "toggle" or "hold"
 	updateAimStatus()
 	showNotification("🎯  Mode : " .. aimMode, 2)
+end)
+
+local methodNames = {"1 - Cam directe", "2 - Cam Scriptable", "3 - HRP orient"}
+createBtn(pages.Perso, "🔧  Méthode : " .. methodNames[aimMethod], currentTheme.Button, 105, function()
+	aimMethod = (aimMethod % 3) + 1
+	showNotification("🎯  Méthode : " .. methodNames[aimMethod], 2)
 end)
 
 -- Dropdown générique (déclaré ici, utilisé pour souris et clavier)
@@ -1835,10 +1895,14 @@ local function startNuke()
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if hum then hum:ChangeState(Enum.HumanoidStateType.Physics) end
 
-	local bv = Instance.new("BodyVelocity", hrp)
-	bv.Name = "NukeBV"
-	bv.Velocity = Vector3.new(0, 200, 0)
-	bv.MaxForce = Vector3.new(0, 1e6, 0)
+	-- LinearVelocity (plus puissant que BodyVelocity sur Roblox moderne)
+	local att = Instance.new("Attachment", hrp)
+	att.Name = "NukeAtt"
+	local lv = Instance.new("LinearVelocity", hrp)
+	lv.Name = "NukeBV"
+	lv.Attachment0 = att
+	lv.VectorVelocity = Vector3.new(0, 50000, 0)   -- ~50 km/s
+	lv.MaxForce = math.huge
 
 	-- Sons fusée (2 couches pour un effet plus puissant)
 	local snd = Instance.new("Sound", hrp)
@@ -1880,7 +1944,8 @@ local function stopNuke()
 	if not char then return end
 	local hrp = char:FindFirstChild("HumanoidRootPart")
 	if hrp then
-		local bv = hrp:FindFirstChild("NukeBV"); if bv then bv:Destroy() end
+		local bv  = hrp:FindFirstChild("NukeBV");  if bv  then bv:Destroy()  end
+		local att = hrp:FindFirstChild("NukeAtt"); if att then att:Destroy() end
 		local snd = hrp:FindFirstChild("NukeSound"); if snd then snd:Destroy() end
 		local sndB = hrp:FindFirstChild("NukeBoost"); if sndB then sndB:Destroy() end
 	end
