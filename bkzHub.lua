@@ -249,7 +249,7 @@ end
 
 -- ================================================
 -- ================================================
-local function createSection(parent, title)
+local function createSection(parent, title, order)
 	local lbl = Instance.new("TextLabel", parent)
 	lbl.Text = "  " .. string.upper(title)
 	lbl.Size = UDim2.new(1, 0, 0, 22)
@@ -258,7 +258,7 @@ local function createSection(parent, title)
 	lbl.Font = Enum.Font.GothamBold
 	lbl.TextSize = 10
 	lbl.TextXAlignment = Enum.TextXAlignment.Left
-	lbl.LayoutOrder = 0
+	lbl.LayoutOrder = order or 0
 end
 
 local function createBtn(parent, text, color, order, func)
@@ -575,7 +575,7 @@ end)
 -- ================================================
 
 -- ================================================
-createSection(pages.Player, "Targeting")
+createSection(pages.Player, "Targeting", 0)
 
 -- Player search container (input + refresh button)
 local searchRow = Instance.new("Frame", pages.Player)
@@ -732,7 +732,7 @@ searchBox.Focused:Connect(function()
 	updateDD(searchBox.Text)
 end)
 
-createSection(pages.Player, "Actions")
+createSection(pages.Player, "Actions", 2)
 
 -- Target player panel information
 local infoPanel = Instance.new("Frame", pages.Player)
@@ -862,7 +862,7 @@ end)
 -- ================================================
 
 -- ================================================
-createSection(pages.Personalnal, "🏃  Movement")
+createSection(pages.Personal, "🏃  Movement", 0)
 
 local savedWalkSpeed = 16
 local savedJumpPower = 50
@@ -903,7 +903,7 @@ createToggle(pages.Personal, "🧊  Freeze (no move)", 4, function(state)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then hrp.Anchored = state end
 end)
-createSection(pages.Personalnal, "🦅  Fly")
+createSection(pages.Personal, "🦅  Fly", 4)
 
 local flyEnabled = false
 local flyBodyVel, flyBodyGyro
@@ -966,9 +966,9 @@ createSlider(pages.Personal, "🦅  Fly Speed", 10, 5000, 40, 6, function(val)
 	flySpeed = val
 end)
 
-createSection(pages.Personalnal, "👁  Collision & Visual")
+createSection(pages.Personal, "👁  Collision & Visual", 6)
 
-createToggle(pages.Personal, "🕶  Noclip (walk through walls)", 5, function(state)
+createToggle(pages.Personal, "🕶  Noclip (walk through walls)", 8, function(state)
 	if state then
 		RunService:BindToRenderStep("Noclip", Enum.RenderPriority.Character.Value + 1, function()
 			local char = player.Character
@@ -990,7 +990,7 @@ createToggle(pages.Personal, "🕶  Noclip (walk through walls)", 5, function(st
 	end
 end)
 
-createSection(pages.Personalnal, "🛡  Survival")
+createSection(pages.Personal, "🛡  Survival", 5)
 
 -- God Mode — 3 methods
 local godConn = nil
@@ -1035,14 +1035,14 @@ createToggle(pages.Personal, "🛡  God Mode (invincible)", 6, function(state)
 	end
 end)
 
-createBtn(pages.Personal, "🔧  God méthode : " .. godMethod .. "/3", currentTheme.Button, 7, function()
+createBtn(pages.Personal, "🔧  God method: " .. godMethod .. "/3", currentTheme.Button, 7, function()
 	godMethod = (godMethod % 3) + 1
 	showNotification("🛡  God method: " .. godMethod, 2)
 end)
 
 -- Infinite Jump
 local jumpConn = nil
-createToggle(pages.Personal, "🦘  Infinite Jump", 7, function(state)
+createToggle(pages.Personal, "🦘  Infinite Jump", 9, function(state)
 	if state then
 		jumpConn = UIS.JumpRequest:Connect(function()
 			local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -1053,7 +1053,7 @@ createToggle(pages.Personal, "🦘  Infinite Jump", 7, function(state)
 	end
 end)
 
-createSection(pages.Personalnal, "🎯  Combat")
+createSection(pages.Personal, "🎯  Combat", 11)
 
 -- ================================================
 
@@ -1215,7 +1215,7 @@ end)
 -- ================================================
 
 -- ================================================
-createSection(pages.Personalnal, "🎯  Aim Lock")
+createSection(pages.Personal, "🎯  Aim Lock", 100)
 
 -- Declaration BEFORE use
 local aimStatusLabel = Instance.new("TextLabel", pages.Personal)
@@ -1353,7 +1353,7 @@ mkDropdown(pages.Personal, "⌨  Keyboard", KEYBOARD_KEYS, 1, 106, function(key)
 	updateAimStatus()
 end)
 
-createSection(pages.Personalnal, "📐  Appearance")
+createSection(pages.Personal, "📐  Appearance", 108)
 
 local currentScale = 1.0
 
@@ -1390,7 +1390,7 @@ end)
 -- ================================================
 
 -- ================================================
-createSection(pages.World, "☀  Environment")
+createSection(pages.World, "☀  Environment", 0)
 
 local shader = nil
 for _, v in pairs(Lighting:GetChildren()) do if v.Name == "AdminShader" then shader = v; break end end
@@ -1428,9 +1428,9 @@ createToggle(pages.World, "🌈  Rainbow Sky", 4, function(state)
 end)
 
 -- Fog
-createSection(pages.World, "🌫  Fog")
+createSection(pages.World, "🌫  Fog", 4)
 
-createSection(pages.World, "🌫  Fog & Effects")
+createSection(pages.World, "🌫  Fog & Effects", 5)
 
 local function getAtmo()
 	local a = Lighting:FindFirstChildOfClass("Atmosphere")
@@ -1555,7 +1555,7 @@ createToggle(pages.World, "🌅  Sunset", 9, function(state)
 	end
 end)
 
-createSection(pages.World, "⏩  Time")
+createSection(pages.World, "⏩  Time", 9)
 
 createSlider(pages.World, "☀  Time of Day", 0, 24, 14, 10, function(val)
 	Lighting.ClockTime = val
@@ -1570,7 +1570,7 @@ createSlider(pages.World, "⏩  Time Speed (x)", 0, 5, 0, 11, function(val)
 	end
 end)
 
-createSection(pages.World, "⚙  Physics")
+createSection(pages.World, "⚙  Physics", 11)
 
 createSlider(pages.World, "🌍  Gravity", 0, 300, 196, 12, function(val)
 	workspace.Gravity = val
@@ -1579,7 +1579,7 @@ createBtn(pages.World, "↩  Reset Gravity", currentTheme.Button, 13, function()
 	workspace.Gravity = 196
 end)
 
-createSection(pages.World, "🖥  Performance")
+createSection(pages.World, "🖥  Performance", 13)
 
 createBtn(pages.World, "🔓  Unlock FPS", currentTheme.Button, 14, function()
 	if setfpscap then RunService:BindToRenderStep("FPSUnlock",1,function() setfpscap(0) end) end
@@ -1617,14 +1617,14 @@ local function applyTheme(t)
 	end
 end
 
-createSection(pages.Settings, "🎨  Theme")
+createSection(pages.Settings, "🎨  Theme", 0)
 createBtn(pages.Settings, "🌑  Dark",  currentTheme.Button, 1, function() applyTheme(Themes.Dark)  end)
 createBtn(pages.Settings, "🌕  Light",   currentTheme.Button, 2, function() applyTheme(Themes.Light) end)
 createBtn(pages.Settings, "💠  Cyber",   currentTheme.Button, 3, function() applyTheme(Themes.Cyber) end)
 createBtn(pages.Settings, "🔴  Red",   currentTheme.Button, 4, function() applyTheme(Themes.Rouge) end)
 createBtn(pages.Settings, "🟢  Green",    currentTheme.Button, 5, function() applyTheme(Themes.Vert)  end)
 
-createSection(pages.Settings, "📐  Size")
+createSection(pages.Settings, "📐  Size", 2)
 createBtn(pages.Settings, "➕  Enlarge (+40)", currentTheme.Button, 3, function()
 	applyMenuSize(menuW + 40, menuH + 40)
 end)
@@ -1640,7 +1640,7 @@ end)
 createBtn(pages.Settings, "↩  Reset Size", currentTheme.Button, 7, function()
 	applyMenuSize(360, 480)
 end)
-createSection(pages.Settings, "💾  Configuration")
+createSection(pages.Settings, "💾  Configuration", 7)
 
 -- Save/load via writefile/readfile (Roblox executors)
 local CONFIG_FILE = "AdminMenu_config.json"
@@ -1717,7 +1717,7 @@ createBtn(pages.Settings, "🏠  Recenter Menu", currentTheme.Button, 9, functio
 	main.Position = UDim2.new(0.5, -menuW/2, 0.5, -menuH/2)
 end)
 
-createSection(pages.Settings, "ℹ  Info")
+createSection(pages.Settings, "ℹ  Info", 10)
 local infoLbl = Instance.new("TextLabel", pages.Settings)
 infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v2.6  •  " .. player.Name
 infoLbl.Size = UDim2.new(1, 0, 0, 60)
@@ -1727,7 +1727,7 @@ infoLbl.Font = Enum.Font.Gotham
 infoLbl.TextSize = 11
 infoLbl.TextWrapped = true
 infoLbl.TextYAlignment = Enum.TextYAlignment.Top
-infoLbl.LayoutOrder = 10
+infoLbl.LayoutOrder = 11
 
 -- ================================================
 
@@ -1975,7 +1975,7 @@ local function stopNuke()
 end
 
 -- Toggle Nuke on the Personal page
-createSection(pages.Personalnal, "💥  Chaos & Fun")
+createSection(pages.Personal, "💥  Chaos & Fun", 9)
 createToggle(pages.Personal, "🚀  NUKE MODE  (propulsion + explosion)", 10, function(state)
 	nukeEnabled = state
 	if state then startNuke() else stopNuke() end
@@ -2400,7 +2400,7 @@ local function createColorDropdown(parent, label, order, defaultColor, onChange)
 end
 
 -- UI ESP in pages.ESP
-createSection(pages.ESP, "⚡  Shortcuts")
+createSection(pages.ESP, "⚡  Shortcuts", -1)
 createBtn(pages.ESP, "⚡  Enable All", currentTheme.Accent, 0, function()
 	for k in pairs(espState) do espState[k] = true end
 	refreshAllESP()
@@ -2410,27 +2410,27 @@ createBtn(pages.ESP, "❌  Disable All", currentTheme.Danger, 1, function()
 	for _, p in ipairs(Players:GetPlayers()) do clearESPFor(p) end
 end)
 
-createSection(pages.ESP, "👤  Player Display")
+createSection(pages.ESP, "👤  Player Display", 1)
 createToggle(pages.ESP, "📦  Boxes", 2, function(s) toggleESP("boxes", s) end)
 createToggle(pages.ESP, "🏷  Names + Team Tag", 3, function(s) toggleESP("names", s) end)
 createToggle(pages.ESP, "❤  Health (text)", 4, function(s) toggleESP("health", s) end)
 createToggle(pages.ESP, "📊  Health Bar", 5, function(s) toggleESP("healthBar", s) end)
 createToggle(pages.ESP, "📏  Distance", 6, function(s) toggleESP("distance", s) end)
 
-createSection(pages.ESP, "🎨  Advanced Visual")
+createSection(pages.ESP, "🎨  Advanced Visual", 6)
 createToggle(pages.ESP, "🔴  Head Dots", 7, function(s) toggleESP("headDots", s) end)
 createToggle(pages.ESP, "💀  Skeleton", 8, function(s) toggleESP("skeletons", s) end)
 createToggle(pages.ESP, "🔆  Chams (Highlight)", 9, function(s) toggleESP("chams", s) end)
 createToggle(pages.ESP, "🎯  Tracers", 10, function(s) toggleESP("tracers", s) end)
 createToggle(pages.ESP, "🔫  Snaplines", 11, function(s) toggleESP("snaplines", s) end)
 
-createSection(pages.ESP, "🗺  Ground Items")
+createSection(pages.ESP, "🗺  Ground Items", 13)
 createToggle(pages.ESP, "🔫  ESP Weapons / Tools", 14, function(s)
 	espState.items = s
 	refreshItemESP()
 end)
 
-createSection(pages.ESP, "🎨  Colors")
+createSection(pages.ESP, "🎨  Colors", 19)
 createColorDropdown(pages.ESP, "🔴  Enemy Color", 20,
 	Color3.fromRGB(255,60,60),
 	function(c) ESP_COLOR_ENEMY = c; refreshAllESP() end
@@ -2442,7 +2442,7 @@ createColorDropdown(pages.ESP, "🔵  Ally Color", 21,
 
 -- OTHER PAGE — Credits
 -- ================================================
-createSection(pages.Other, "👑  Credits")
+createSection(pages.Other, "👑  Credits", 0)
 
 local credits = {
 	{"👑  Owner","вκ乙"},
@@ -2482,7 +2482,7 @@ for i, entry in ipairs(credits) do
 	nameLbl.TextWrapped = true
 end
 
-createSection(pages.Other, "ℹ  Version")
+createSection(pages.Other, "ℹ  Version", 98)
 local verLabel = Instance.new("TextLabel", pages.Other)
 verLabel.Size = UDim2.new(1, 0, 0, 40)
 verLabel.BackgroundTransparency = 1
