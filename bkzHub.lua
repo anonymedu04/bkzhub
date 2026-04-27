@@ -873,26 +873,44 @@ end)
 -- ================================================
 createSection(pages.Perso, "🏃  Mouvement")
 
+local savedWalkSpeed = 16
+local savedJumpPower = 50
+
+local function applyMovement(char)
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+	hum.WalkSpeed = savedWalkSpeed
+	hum.JumpPower = savedJumpPower
+	hum.JumpHeight = savedJumpPower * 0.3  -- fallback JumpHeight
+end
+
+player.CharacterAdded:Connect(function(char)
+	task.wait(0.3)
+	applyMovement(char)
+end)
+
 createToggle(pages.Perso, "⚡  Goku TP (F + souris)", 1, function(state)
 	gokuMode = state
 end)
 
-createSlider(pages.Perso, "🏃  Vitesse de marche", 16, 150, 16, 2, function(val)
-	if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-		player.Character.Humanoid.WalkSpeed = val
-	end
+createSlider(pages.Perso, "🏃  Vitesse de marche", 16, 250, 16, 2, function(val)
+	savedWalkSpeed = val
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then hum.WalkSpeed = val end
 end)
 
-createSlider(pages.Perso, "🦘  Puissance de saut", 7, 200, 50, 3, function(val)
-	if player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-		player.Character.Humanoid.JumpPower = val
+createSlider(pages.Perso, "🦘  Hauteur de saut", 7, 500, 50, 3, function(val)
+	savedJumpPower = val
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.JumpPower = val
+		hum.JumpHeight = val * 0.3
 	end
 end)
 
 createToggle(pages.Perso, "🧊  Freeze (immobile)", 4, function(state)
-	if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-		player.Character.HumanoidRootPart.Anchored = state
-	end
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if hrp then hrp.Anchored = state end
 end)
 createSection(pages.Perso, "🦅  Vol")
 
@@ -953,14 +971,11 @@ createToggle(pages.Perso, "🦅  Fly  (WASD + Space/Ctrl)", 5, function(state)
 	if state then enableFly() else disableFly() end
 end)
 
-createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 200, 40, 6, function(val)
+createSlider(pages.Perso, "🦅  Vitesse du fly", 10, 5000, 40, 6, function(val)
 	flySpeed = val
 end)
 
 createSection(pages.Perso, "👁  Collision & Visuel")
-
-local noclipSpeed = 50
-local noclipBV = nil
 
 createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state)
 	if state then
@@ -970,27 +985,11 @@ createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state
 			for _, part in ipairs(char:GetDescendants()) do
 				if part:IsA("BasePart") then part.CanCollide = false end
 			end
-			-- Mouvement directionnel libre
 			local hrp = char:FindFirstChild("HumanoidRootPart")
-			if not hrp then return end
-			if not noclipBV or not noclipBV.Parent then
-				noclipBV = Instance.new("BodyVelocity", hrp)
-				noclipBV.Name = "NoclipBV"
-				noclipBV.MaxForce = Vector3.new(1e6,1e6,1e6)
-			end
-			local cam = workspace.CurrentCamera
-			local dir = Vector3.zero
-			if UIS:IsKeyDown(Enum.KeyCode.W) then dir = dir + cam.CFrame.LookVector end
-			if UIS:IsKeyDown(Enum.KeyCode.S) then dir = dir - cam.CFrame.LookVector end
-			if UIS:IsKeyDown(Enum.KeyCode.A) then dir = dir - cam.CFrame.RightVector end
-			if UIS:IsKeyDown(Enum.KeyCode.D) then dir = dir + cam.CFrame.RightVector end
-			if UIS:IsKeyDown(Enum.KeyCode.Space) then dir = dir + Vector3.new(0,1,0) end
-			if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then dir = dir - Vector3.new(0,1,0) end
-			noclipBV.Velocity = dir.Magnitude > 0 and dir.Unit * noclipSpeed or Vector3.zero
+			if hrp then hrp.CanCollide = false end
 		end)
 	else
 		RunService:UnbindFromRenderStep("Noclip")
-		if noclipBV then noclipBV:Destroy(); noclipBV = nil end
 		local char = player.Character
 		if char then
 			for _, part in ipairs(char:GetDescendants()) do
@@ -1000,23 +999,55 @@ createToggle(pages.Perso, "🕶  Noclip (traverser les murs)", 5, function(state
 	end
 end)
 
-createSlider(pages.Perso, "💨  Vitesse Noclip", 10, 5000, 50, 6, function(val)
-	noclipSpeed = val
-end)
-
 createSection(pages.Perso, "🛡  Survie")
 
--- God Mode
+-- God Mode — 3 méthodes alternatives
 local godConn = nil
+local godMethod = 1
+
+local function applyGodMethod(hum)
+	if godMethod == 1 then
+		-- Méthode 1 : forcer Health = MaxHealth chaque Heartbeat
+		hum.Health = hum.MaxHealth
+	elseif godMethod == 2 then
+		-- Méthode 2 : MaxHealth très élevé + Health
+		hum.MaxHealth = math.huge
+		hum.Health = math.huge
+	elseif godMethod == 3 then
+		-- Méthode 3 : HealthChanged reset immédiat
+		-- (connexion séparée gérée dans le toggle)
+	end
+end
+
 createToggle(pages.Perso, "🛡  God Mode (invincible)", 6, function(state)
+	if godConn then godConn:Disconnect(); godConn = nil end
 	if state then
 		godConn = RunService.Heartbeat:Connect(function()
-			local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-			if hum then hum.Health = hum.MaxHealth end
+			local char = player.Character
+			if not char then return end
+			local hum = char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				pcall(applyGodMethod, hum)
+				-- Méthode 3 en supplément : HealthChanged
+				if godMethod == 3 then
+					hum:SetAttribute("_godHook", true)
+					if not hum:GetAttribute("_godConn") then
+						hum:GetAttributeChangedSignal("Health"):Connect(function()
+							if hum:GetAttribute("_godHook") then
+								hum.Health = hum.MaxHealth
+							end
+						end)
+						hum:SetAttribute("_godConn", true)
+					end
+				end
+			end
 		end)
-	else
-		if godConn then godConn:Disconnect(); godConn = nil end
 	end
+end)
+
+createBtn(pages.Perso, "🔧  God méthode : " .. godMethod .. "/3", currentTheme.Button, 7, function()
+	godMethod = (godMethod % 3) + 1
+	showNotification("🛡  God méthode : " .. godMethod, 2)
 end)
 
 -- Infinite Jump
@@ -2003,25 +2034,25 @@ end)
 -- PAGE ESP
 -- ================================================
 local espState = {
-	boxes       = false,
-	names       = false,
-	health      = false,
-	distance    = false,
-	tracers     = false,
-	headDots    = false,
-	skeletons   = false,
-	chams       = false,
-	healthBar   = false,
-	snaplines   = false,
+	boxes     = false,
+	names     = false,
+	health    = false,
+	distance  = false,
+	tracers   = false,
+	headDots  = false,
+	skeletons = false,
+	chams     = false,
+	healthBar = false,
+	items     = false,   -- ESP armes/outils au sol
 }
-local espObjects = {}  -- { [player] = { parts... } }
-local espConn = nil
+local espObjects = {}
+local espConn    = nil
+local espItemObjs = {}  -- { [instance] = BillboardGui }
 
-local ESP_COLOR_ALLY   = Color3.fromRGB(50, 200, 100)
-local ESP_COLOR_ENEMY  = Color3.fromRGB(255, 60, 60)
-local ESP_TRACER_COLOR = Color3.fromRGB(255, 255, 50)
+local ESP_COLOR_ALLY  = Color3.fromRGB(50, 200, 100)
+local ESP_COLOR_ENEMY = Color3.fromRGB(255, 60, 60)
 
--- Nettoie tous les objets ESP d'un joueur
+-- Nettoie ESP d'un joueur
 local function clearESPFor(p)
 	if espObjects[p] then
 		for _, obj in ipairs(espObjects[p]) do
@@ -2031,204 +2062,177 @@ local function clearESPFor(p)
 	end
 end
 
--- Construit l'ESP pour un joueur selon les états actifs
+-- Helper billboard compact
+local function mkBB(parent, name, w, h, offsetY, maxDist)
+	local bb = Instance.new("BillboardGui", parent)
+	bb.Name = name; bb.AlwaysOnTop = true
+	bb.Size = UDim2.new(0, w, 0, h)
+	bb.StudsOffset = Vector3.new(0, offsetY, 0)
+	bb.MaxDistance = maxDist or 600
+	bb.LightInfluence = 0
+	return bb
+end
+
+-- Helper label compact
+local function mkLbl(parent, txt, size, color)
+	local l = Instance.new("TextLabel", parent)
+	l.Size = UDim2.new(1,0,1,0)
+	l.BackgroundTransparency = 1
+	l.Text = txt
+	l.TextColor3 = color or Color3.new(1,1,1)
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = size or 10
+	l.TextStrokeTransparency = 0.15
+	l.TextStrokeColor3 = Color3.new(0,0,0)
+	l.TextScaled = false
+	return l
+end
+
 local function buildESPFor(p)
 	clearESPFor(p)
 	local char = p.Character
 	if not char or p == player then return end
 
-	local objs = {}
-
-	-- Team check : allié = bleu, ennemi = rouge (couleurs modifiables)
-	local isAlly = (player.Team ~= nil) and (p.Team == player.Team)
-	local color  = isAlly and ESP_COLOR_ALLY or ESP_COLOR_ENEMY
-
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local head = char:FindFirstChild("Head")
 	if not hrp then return end
 
-	-- 1. CHAMS (Highlight) — toujours en dessous des autres éléments
+	local isAlly = player.Team ~= nil and p.Team == player.Team
+	local color  = isAlly and ESP_COLOR_ALLY or ESP_COLOR_ENEMY
+	local objs   = {}
+
+	-- CHAMS (Highlight natif Roblox — fonctionne partout)
 	if espState.chams then
+		-- Supprimer ancien highlight si présent
+		local old = char:FindFirstChild("ESP_Highlight")
+		if old then old:Destroy() end
 		local hl = Instance.new("Highlight", char)
 		hl.Name = "ESP_Highlight"
-		hl.FillColor       = color
-		hl.OutlineColor    = color
-		hl.FillTransparency    = isAlly and 0.75 or 0.6
+		hl.FillColor = color
+		hl.OutlineColor = color
+		hl.FillTransparency = 0.7
 		hl.OutlineTransparency = 0
 		hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 		table.insert(objs, hl)
 	end
 
-	-- 2. SELECTION BOX (box 3D autour du perso entier)
+	-- BOX (SelectionBox)
 	if espState.boxes then
 		local box = Instance.new("SelectionBox", workspace)
-		box.Adornee        = char
-		box.Color3         = color
-		box.LineThickness  = 0.05
-		box.SurfaceColor3  = color
-		box.SurfaceTransparency = isAlly and 0.92 or 0.85
+		box.Adornee = char
+		box.Color3 = color
+		box.LineThickness = 0.04
+		box.SurfaceColor3 = color
+		box.SurfaceTransparency = 0.9
 		table.insert(objs, box)
 	end
 
-	-- 3. HEAD DOT (cercle sur la tête)
-	if espState.headDots then
-		local head = char:FindFirstChild("Head")
-		if head then
-			local bb = Instance.new("BillboardGui", head)
-			bb.Name = "ESP_HeadDot"; bb.AlwaysOnTop = true
-			bb.Size = UDim2.new(0, 16, 0, 16)
-			bb.StudsOffset = Vector3.new(0, 0.6, 0)
-			bb.MaxDistance = 800
-			local dot = Instance.new("Frame", bb)
-			dot.Size = UDim2.new(1,0,1,0)
-			dot.BackgroundColor3 = color
-			dot.BorderSizePixel = 0
-			Instance.new("UICorner", dot).CornerRadius = UDim.new(1,0)
-			-- contour blanc
-			local stroke = Instance.new("UIStroke", dot)
-			stroke.Color = Color3.new(1,1,1); stroke.Thickness = 1.5
-			table.insert(objs, bb)
-		end
-	end
-
-	-- 4. NAMETAG (nom + tag allié/ennemi)
-	if espState.names then
-		local bb = Instance.new("BillboardGui", hrp)
-		bb.Name = "ESP_Name"; bb.AlwaysOnTop = true
-		bb.Size = UDim2.new(0, 140, 0, 24)
-		bb.StudsOffset = Vector3.new(0, 3.6, 0)
-		bb.MaxDistance = 800
-
-		local bg = Instance.new("Frame", bb)
-		bg.Size = UDim2.new(1,0,1,0)
-		bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
-		bg.BackgroundTransparency = 0.45
-		bg.BorderSizePixel = 0
-		Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 4)
-
-		local lbl = Instance.new("TextLabel", bg)
-		lbl.Size = UDim2.new(1,-4,1,0)
-		lbl.Position = UDim2.new(0,2,0,0)
-		lbl.BackgroundTransparency = 1
-		lbl.Text = (isAlly and "🔵 " or "🔴 ") .. p.Name
-		lbl.TextColor3 = color
-		lbl.Font = Enum.Font.GothamBold
-		lbl.TextSize = 12
-		lbl.TextStrokeTransparency = 0.2
-		lbl.TextStrokeColor3 = Color3.new(0,0,0)
-		table.insert(objs, bb)
-	end
-
-	-- 5. SANTÉ (texte)
-	if espState.health and hum then
-		local bb = Instance.new("BillboardGui", hrp)
-		bb.Name = "ESP_HP"; bb.AlwaysOnTop = true
-		bb.Size = UDim2.new(0, 90, 0, 16)
-		bb.StudsOffset = Vector3.new(0, 2.9, 0)
-		bb.MaxDistance = 600
-		local lbl = Instance.new("TextLabel", bb)
-		lbl.Size = UDim2.new(1,0,1,0)
-		lbl.BackgroundTransparency = 1
-		lbl.Text = "❤ " .. math.floor(hum.Health) .. "/" .. math.floor(hum.MaxHealth)
-		local pct0 = hum.Health / math.max(hum.MaxHealth, 1)
-		lbl.TextColor3 = Color3.fromRGB(math.floor(255*(1-pct0)), math.floor(200*pct0+55), 50)
-		lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 11
-		lbl.TextStrokeTransparency = 0.3; lbl.TextStrokeColor3 = Color3.new(0,0,0)
-		hum.HealthChanged:Connect(function(h)
-			local pct = math.clamp(h / math.max(hum.MaxHealth,1), 0, 1)
-			lbl.Text = "❤ " .. math.floor(h) .. "/" .. math.floor(hum.MaxHealth)
-			lbl.TextColor3 = Color3.fromRGB(math.floor(255*(1-pct)), math.floor(200*pct+55), 50)
-		end)
-		table.insert(objs, bb)
-	end
-
-	-- 6. BARRE DE SANTÉ verticale
-	if espState.healthBar and hum then
-		local bb = Instance.new("BillboardGui", hrp)
-		bb.Name = "ESP_HealthBar"; bb.AlwaysOnTop = true
-		bb.Size = UDim2.new(0, 6, 0, 64)
-		bb.StudsOffset = Vector3.new(-1.6, 0, 0)
-		bb.MaxDistance = 600
-		-- Fond sombre
-		local bg = Instance.new("Frame", bb)
-		bg.Size = UDim2.new(1,0,1,0)
-		bg.BackgroundColor3 = Color3.fromRGB(20,20,20)
-		bg.BackgroundTransparency = 0.3
-		bg.BorderSizePixel = 0
-		Instance.new("UICorner", bg).CornerRadius = UDim.new(1,0)
-		-- Fill
-		local fill = Instance.new("Frame", bg)
-		fill.AnchorPoint = Vector2.new(0,1)
-		fill.Position = UDim2.new(0,0,1,0)
-		local pct0 = math.clamp(hum.Health / math.max(hum.MaxHealth,1), 0, 1)
-		fill.Size = UDim2.new(1,0, pct0, 0)
-		fill.BackgroundColor3 = Color3.fromRGB(math.floor(255*(1-pct0)), math.floor(220*pct0+35), 50)
-		fill.BorderSizePixel = 0
-		Instance.new("UICorner", fill).CornerRadius = UDim.new(1,0)
-		hum.HealthChanged:Connect(function(h)
-			local pct = math.clamp(h / math.max(hum.MaxHealth,1), 0, 1)
-			TweenService:Create(fill, TweenInfo.new(0.15), {
-				Size = UDim2.new(1,0,pct,0),
-				BackgroundColor3 = Color3.fromRGB(math.floor(255*(1-pct)), math.floor(220*pct+35), 50),
-			}):Play()
-		end)
-		table.insert(objs, bb)
-	end
-
-	-- 7. DISTANCE
-	if espState.distance then
-		local bb = Instance.new("BillboardGui", hrp)
-		bb.Name = "ESP_Dist"; bb.AlwaysOnTop = true
-		bb.Size = UDim2.new(0, 80, 0, 14)
-		bb.StudsOffset = Vector3.new(0, 2.3, 0)
-		bb.MaxDistance = 1000
-		local lbl = Instance.new("TextLabel", bb)
-		lbl.Size = UDim2.new(1,0,1,0)
-		lbl.BackgroundTransparency = 1
-		lbl.Text = "?m"
-		lbl.TextColor3 = Color3.fromRGB(200,200,255)
-		lbl.Font = Enum.Font.Gotham; lbl.TextSize = 10
-		lbl.TextStrokeTransparency = 0.4; lbl.TextStrokeColor3 = Color3.new(0,0,0)
-		table.insert(objs, bb)
-	end
-
-	-- 8. TRACER (point au pied)
-	if espState.tracers then
-		local bb = Instance.new("BillboardGui", hrp)
-		bb.Name = "ESP_Tracer"; bb.AlwaysOnTop = true
-		bb.Size = UDim2.new(0, 8, 0, 8)
-		bb.StudsOffset = Vector3.new(0, -3, 0)
-		bb.MaxDistance = 800
+	-- HEAD DOT
+	if espState.headDots and head then
+		local bb = mkBB(head, "ESP_HeadDot", 10, 10, 0.5, 500)
 		local dot = Instance.new("Frame", bb)
 		dot.Size = UDim2.new(1,0,1,0)
 		dot.BackgroundColor3 = color
 		dot.BorderSizePixel = 0
 		Instance.new("UICorner", dot).CornerRadius = UDim.new(1,0)
+		local st = Instance.new("UIStroke", dot)
+		st.Color = Color3.new(1,1,1); st.Thickness = 1
 		table.insert(objs, bb)
 	end
 
-	-- 9. SQUELETTE (Beams entre joints)
+	-- NOM (compact, petit)
+	if espState.names then
+		local bb = mkBB(hrp, "ESP_Name", 100, 16, 3.2, 500)
+		local lbl = mkLbl(bb, p.Name, 9, color)
+		lbl.Text = (isAlly and "[A] " or "[E] ") .. p.Name
+		table.insert(objs, bb)
+	end
+
+	-- SANTÉ texte
+	if espState.health and hum then
+		local bb = mkBB(hrp, "ESP_HP", 80, 12, 2.6, 400)
+		local lbl = mkLbl(bb, math.floor(hum.Health) .. "hp", 8,
+			Color3.fromRGB(80 + math.floor(175*(1 - hum.Health/math.max(hum.MaxHealth,1))),
+			200 - math.floor(150*(1 - hum.Health/math.max(hum.MaxHealth,1))), 50))
+		hum.HealthChanged:Connect(function(h)
+			local pct = math.clamp(h/math.max(hum.MaxHealth,1),0,1)
+			lbl.Text = math.floor(h) .. "hp"
+			lbl.TextColor3 = Color3.fromRGB(80+math.floor(175*(1-pct)), 200-math.floor(150*(1-pct)), 50)
+		end)
+		table.insert(objs, bb)
+	end
+
+	-- BARRE DE SANTÉ (verticale, fine)
+	if espState.healthBar and hum then
+		local bb = mkBB(hrp, "ESP_Bar", 4, 50, 0, 400)
+		bb.StudsOffset = Vector3.new(-1.2, 0, 0)
+		local bg = Instance.new("Frame", bb)
+		bg.Size = UDim2.new(1,0,1,0)
+		bg.BackgroundColor3 = Color3.fromRGB(25,25,25)
+		bg.BackgroundTransparency = 0.2
+		bg.BorderSizePixel = 0
+		Instance.new("UICorner", bg).CornerRadius = UDim.new(1,0)
+		local fill = Instance.new("Frame", bg)
+		fill.AnchorPoint = Vector2.new(0,1)
+		fill.Position = UDim2.new(0,0,1,0)
+		local p0 = math.clamp(hum.Health/math.max(hum.MaxHealth,1),0,1)
+		fill.Size = UDim2.new(1,0,p0,0)
+		fill.BackgroundColor3 = Color3.fromRGB(math.floor(255*(1-p0)), math.floor(220*p0+35), 40)
+		fill.BorderSizePixel = 0
+		Instance.new("UICorner", fill).CornerRadius = UDim.new(1,0)
+		hum.HealthChanged:Connect(function(h)
+			local pct = math.clamp(h/math.max(hum.MaxHealth,1),0,1)
+			fill.Size = UDim2.new(1,0,pct,0)
+			fill.BackgroundColor3 = Color3.fromRGB(math.floor(255*(1-pct)), math.floor(220*pct+35), 40)
+		end)
+		table.insert(objs, bb)
+	end
+
+	-- DISTANCE
+	if espState.distance then
+		local bb = mkBB(hrp, "ESP_Dist", 60, 10, 2.1, 1000)
+		mkLbl(bb, "?m", 8, Color3.fromRGB(180,180,255))
+		table.insert(objs, bb)
+	end
+
+	-- TRACER (point au pied)
+	if espState.tracers then
+		local bb = mkBB(hrp, "ESP_Tracer", 6, 6, -3, 600)
+		local dot = Instance.new("Frame", bb)
+		dot.Size = UDim2.new(1,0,1,0)
+		dot.BackgroundColor3 = color; dot.BorderSizePixel = 0
+		Instance.new("UICorner", dot).CornerRadius = UDim.new(1,0)
+		table.insert(objs, bb)
+	end
+
+	-- SQUELETTE (Beams) — fonctionne R6 et R15
 	if espState.skeletons then
-		local JOINTS = {
+		local JOINTS_R15 = {
 			{"Head","UpperTorso"},{"UpperTorso","LowerTorso"},
 			{"UpperTorso","RightUpperArm"},{"RightUpperArm","RightLowerArm"},{"RightLowerArm","RightHand"},
 			{"UpperTorso","LeftUpperArm"},{"LeftUpperArm","LeftLowerArm"},{"LeftLowerArm","LeftHand"},
 			{"LowerTorso","RightUpperLeg"},{"RightUpperLeg","RightLowerLeg"},{"RightLowerLeg","RightFoot"},
 			{"LowerTorso","LeftUpperLeg"},{"LeftUpperLeg","LeftLowerLeg"},{"LeftLowerLeg","LeftFoot"},
 		}
-		for _, pair in ipairs(JOINTS) do
+		local JOINTS_R6 = {
+			{"Head","Torso"},{"Torso","Left Arm"},{"Torso","Right Arm"},
+			{"Torso","Left Leg"},{"Torso","Right Leg"},
+		}
+		local joints = char:FindFirstChild("UpperTorso") and JOINTS_R15 or JOINTS_R6
+		for _, pair in ipairs(joints) do
 			local a = char:FindFirstChild(pair[1])
 			local b = char:FindFirstChild(pair[2])
 			if a and b then
 				local att0 = Instance.new("Attachment", a)
 				local att1 = Instance.new("Attachment", b)
-				local beam = Instance.new("Beam", a)
+				local beam = Instance.new("Beam", workspace)
 				beam.Attachment0 = att0; beam.Attachment1 = att1
 				beam.Color = ColorSequence.new(color)
-				beam.Width0 = 0.06; beam.Width1 = 0.06
+				beam.Width0 = 0.05; beam.Width1 = 0.05
 				beam.FaceCamera = true
-				beam.Transparency = NumberSequence.new(0.15)
-				beam.LightEmission = 0.4
+				beam.Transparency = NumberSequence.new(0.1)
+				beam.LightEmission = 0.3
 				table.insert(objs, att0); table.insert(objs, att1); table.insert(objs, beam)
 			end
 		end
@@ -2236,6 +2240,41 @@ local function buildESPFor(p)
 
 	espObjects[p] = objs
 end
+
+-- ================================================
+-- ESP ITEMS (armes/outils posés au sol)
+-- ================================================
+local function refreshItemESP()
+	-- Nettoyer anciens
+	for inst, bb in pairs(espItemObjs) do
+		if bb and bb.Parent then bb:Destroy() end
+	end
+	espItemObjs = {}
+
+	if not espState.items then return end
+
+	-- Scanner workspace pour les Tools et les Parts nommées "Handle"
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Tool") and not obj.Parent:IsA("Model") then
+			-- Tool posé au sol
+			local handle = obj:FindFirstChild("Handle")
+			if handle and handle:IsA("BasePart") then
+				local bb = mkBB(handle, "ESP_Item", 120, 14, 0.5, 300)
+				bb.AlwaysOnTop = true
+				mkLbl(bb, "🔫 " .. obj.Name, 8, Color3.fromRGB(255, 200, 50))
+				espItemObjs[obj] = bb
+			end
+		end
+	end
+end
+
+-- Rafraîchir items ESP périodiquement
+task.spawn(function()
+	while true do
+		task.wait(3)
+		if espState.items then refreshItemESP() end
+	end
+end)
 
 -- Met à jour distance chaque seconde
 local function updateDistances()
@@ -2402,6 +2441,12 @@ createToggle(pages.ESP, "💀  Squelette", 8, function(s) toggleESP("skeletons",
 createToggle(pages.ESP, "🔆  Chams (Highlight)", 9, function(s) toggleESP("chams", s) end)
 createToggle(pages.ESP, "🎯  Tracers", 10, function(s) toggleESP("tracers", s) end)
 createToggle(pages.ESP, "🔫  Snaplines", 11, function(s) toggleESP("snaplines", s) end)
+
+createSection(pages.ESP, "🗺  Objets au sol")
+createToggle(pages.ESP, "🔫  ESP Armes / Outils", 14, function(s)
+	espState.items = s
+	refreshItemESP()
+end)
 
 createSection(pages.ESP, "🎨  Couleurs")
 createColorDropdown(pages.ESP, "🔴  Couleur Ennemis", 20,
