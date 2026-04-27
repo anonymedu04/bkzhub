@@ -1,7 +1,7 @@
 -- ================================================
---  ADMIN MENU V8 | lopine06 | Touche B pour ouvrir
+--  вκ乙 HUB V8 | By вκ乙 | Keys B for open !
 -- ================================================
-task.wait(1) -- attend que Roblox soit prêt
+task.wait(1)
 
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -18,7 +18,6 @@ local playerGui = player:WaitForChild("PlayerGui")
 if playerGui:FindFirstChild("AdminMenu") then playerGui.AdminMenu:Destroy() end
 
 -- ================================================
--- THÈMES
 -- ================================================
 local Themes = {
 	Dark = {
@@ -100,7 +99,6 @@ local Themes = {
 local currentTheme = Themes.Dark
 
 -- ================================================
--- GUI ROOT
 -- ================================================
 local gui = Instance.new("ScreenGui", playerGui)
 gui.Name = "AdminMenu"
@@ -108,7 +106,7 @@ gui.Enabled = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.ResetOnSpawn = false
 
--- Fenêtre principale
+-- Main window
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 360, 0, 480)
 main.Position = UDim2.new(0.5, -180, 0.5, -240)
@@ -123,7 +121,6 @@ stroke.Thickness = 1.5
 stroke.Transparency = 0.5
 
 -- ================================================
--- HEADER
 -- ================================================
 local header = Instance.new("Frame", main)
 header.Size = UDim2.new(1, 0, 0, 48)
@@ -131,7 +128,7 @@ header.BackgroundColor3 = currentTheme.Panel
 header.BorderSizePixel = 0
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
 
--- Masquer coins bas du header
+-- Hide bottom corners of the header
 local headerFix = Instance.new("Frame", header)
 headerFix.Size = UDim2.new(1, 0, 0, 12)
 headerFix.Position = UDim2.new(0, 0, 1, -12)
@@ -139,7 +136,7 @@ headerFix.BackgroundColor3 = currentTheme.Panel
 headerFix.BorderSizePixel = 0
 
 local title = Instance.new("TextLabel", header)
-title.Text = "⚡ ADMIN PANEL"
+title.Text = "🌐 вκ乙 HUB"
 title.Size = UDim2.new(1, -50, 1, 0)
 title.Position = UDim2.new(0, 15, 0, 0)
 title.BackgroundTransparency = 1
@@ -149,7 +146,7 @@ title.TextSize = 15
 title.TextXAlignment = Enum.TextXAlignment.Left
 
 local subtitle = Instance.new("TextLabel", header)
-subtitle.Text = "v8.0  •  " .. player.Name
+subtitle.Text = "v2.6  •  " .. player.Name
 subtitle.Size = UDim2.new(1, -50, 0, 14)
 subtitle.Position = UDim2.new(0, 15, 0, 30)
 subtitle.BackgroundTransparency = 1
@@ -158,7 +155,7 @@ subtitle.Font = Enum.Font.Gotham
 subtitle.TextSize = 11
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 
--- Bouton fermer
+-- Close button
 local closeBtn = Instance.new("TextButton", header)
 closeBtn.Text = "🚪"
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -172,7 +169,6 @@ Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
 closeBtn.MouseButton1Click:Connect(function() gui.Enabled = false end)
 
 -- ================================================
--- ONGLETS
 -- ================================================
 local tabBar = Instance.new("Frame", main)
 tabBar.Size = UDim2.new(1, -20, 0, 36)
@@ -188,15 +184,14 @@ tabPad.PaddingLeft = UDim.new(0, 3); tabPad.PaddingRight = UDim.new(0, 3)
 tabPad.PaddingTop = UDim.new(0, 3); tabPad.PaddingBottom = UDim.new(0, 3)
 
 -- ================================================
--- PAGES
 -- ================================================
 local tabDefs = {
 	{ name = "Player",   icon = "👤" },
-	{ name = "Perso",    icon = "⚡" },
+	{ name = "Personal",    icon = "🔒" },
 	{ name = "ESP",      icon = "👁" },
 	{ name = "World",    icon = "🌍" },
 	{ name = "Settings", icon = "⚙" },
-	{ name = "Autre",    icon = "ℹ" },
+	{ name = "Other",    icon = "ℹ" },
 }
 
 local pages = {}
@@ -204,7 +199,7 @@ local tabBtns = {}
 local activeTab = "Player"
 
 for _, def in ipairs(tabDefs) do
-	-- Page
+
 	local page = Instance.new("ScrollingFrame", main)
 	page.Name = def.name
 	page.Size = UDim2.new(1, -20, 1, -102)
@@ -223,9 +218,8 @@ for _, def in ipairs(tabDefs) do
 	pad.PaddingTop = UDim.new(0, 4)
 	pages[def.name] = page
 
-	-- Tab bouton (6 onglets → 1/6 de la largeur)
 	local tb = Instance.new("TextButton", tabBar)
-	tb.Text = def.icon  -- icône seule pour gagner de la place
+	tb.Text = def.icon
 	tb.Size = UDim2.new(0.1667, -3, 1, 0)
 	tb.BackgroundColor3 = (def.name == "Player") and currentTheme.TabActive or currentTheme.Tab
 	tb.TextColor3 = (def.name == "Player") and Color3.new(1,1,1) or currentTheme.SubText
@@ -233,7 +227,7 @@ for _, def in ipairs(tabDefs) do
 	tb.TextSize = 16
 	tb.BorderSizePixel = 0
 	Instance.new("UICorner", tb).CornerRadius = UDim.new(0, 6)
-	-- Nom en petit sous l'icône
+
 	local nameLbl = Instance.new("TextLabel", tb)
 	nameLbl.Size = UDim2.new(1, 0, 0, 10)
 	nameLbl.Position = UDim2.new(0, 0, 1, -11)
@@ -254,7 +248,6 @@ for _, def in ipairs(tabDefs) do
 end
 
 -- ================================================
--- COMPOSANTS UI HELPERS
 -- ================================================
 local function createSection(parent, title)
 	local lbl = Instance.new("TextLabel", parent)
@@ -423,7 +416,7 @@ local function createSlider(parent, text, min, max, default, order, func)
 end
 
 -- ================================================
--- DRAG (menu entier, zones non-interactives)
+
 -- ================================================
 local dragging, dragStart, startPos
 
@@ -433,7 +426,6 @@ local function startDrag(input)
 	end
 end
 
--- Zone de drag transparente derrière tout le contenu
 local dragZone = Instance.new("TextButton", main)
 dragZone.Size = UDim2.new(1, 0, 1, 0)
 dragZone.BackgroundTransparency = 1
@@ -453,7 +445,7 @@ UIS.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
 -- ================================================
--- GOKU TP
+
 -- ================================================
 local gokuMode = false
 
@@ -479,13 +471,13 @@ local function playInstantTransmissionFX(position)
 	local hrp = char.HumanoidRootPart
 	local originCFrame = hrp.CFrame
 
-	-- Son départ : whoosh puissant
+	-- His departure: whoosh, powerful!
 	local snd1 = Instance.new("Sound", hrp)
 	snd1.SoundId = "rbxassetid://126099526912322"
 	snd1.Volume = 2.5; snd1.PlaybackSpeed = 1.3
 	snd1:Play(); Debris:AddItem(snd1, 2)
 
-	-- Afterimage fantôme du perso à l'origine
+	-- Afterimage of the original character's ghost
 	for _, part in ipairs(char:GetDescendants()) do
 		if part:IsA("BasePart") then
 			local ghost = Instance.new("Part", workspace)
@@ -500,7 +492,7 @@ local function playInstantTransmissionFX(position)
 		end
 	end
 
-	-- Pilier de lumière à l'origine
+	-- Originally a pillar of light
 	local pillar = Instance.new("Part", workspace)
 	pillar.Size = Vector3.new(2.5, 40, 2.5)
 	pillar.CFrame = originCFrame * CFrame.new(0, 20, 0)
@@ -512,15 +504,15 @@ local function playInstantTransmissionFX(position)
 	}):Play()
 	Debris:AddItem(pillar, 0.5)
 
-	-- Anneaux départ
+	-- Starting rings
 	spawnRing(originCFrame, Color3.fromRGB(100, 200, 255), 5)
 	spawnRing(originCFrame, Color3.fromRGB(255, 255, 255), 2.5)
 
-	-- TP effectif
+	-- Effective TP
 	task.wait(0.06)
 	hrp.CFrame = CFrame.new(position + Vector3.new(0, 3, 0))
 
-	-- Son impact arrivée
+	-- Its arrival impact
 	local snd2 = Instance.new("Sound", hrp)
 	snd2.SoundId = "rbxassetid://3716468774"
 	snd2.Volume = 2; snd2.PlaybackSpeed = 0.85
@@ -528,7 +520,7 @@ local function playInstantTransmissionFX(position)
 
 	local arrCF = hrp.CFrame
 
-	-- Shockwave sol arrivée
+	-- Shockwave ground arrival
 	local wave = Instance.new("Part", workspace)
 	wave.Shape = Enum.PartType.Cylinder
 	wave.Size = Vector3.new(0.2, 2, 2)
@@ -541,12 +533,12 @@ local function playInstantTransmissionFX(position)
 	}):Play()
 	Debris:AddItem(wave, 0.55)
 
-	-- Anneaux arrivée (3 couches)
+	-- Arrival rings (3 layers)
 	spawnRing(arrCF, Color3.fromRGB(255, 255, 180), 6)
 	spawnRing(arrCF, Color3.fromRGB(100, 200, 255), 3.5)
 	spawnRing(arrCF, Color3.fromRGB(255, 255, 255), 1.8)
 
-	-- Éclat central arrivée
+	-- Central flash arrival
 	local burst = Instance.new("Part", workspace)
 	burst.Shape = Enum.PartType.Ball
 	burst.Size = Vector3.new(3, 3, 3)
@@ -562,16 +554,16 @@ end
 
 UIS.InputBegan:Connect(function(input, gpe)
 	if not gpe and gokuMode and input.KeyCode == Enum.KeyCode.F then
-		-- Son de téléportation (whoosh + impact)
+
 		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			local sndTP = Instance.new("Sound", hrp)
-			sndTP.SoundId = "rbxassetid://126099526912322"  -- whoosh téléportation
+			sndTP.SoundId = "rbxassetid://126099526912322"
 			sndTP.Volume = 1.5; sndTP.PlaybackSpeed = 1.2
 			sndTP:Play(); Debris:AddItem(sndTP, 2)
 
 			local sndImpact = Instance.new("Sound", hrp)
-			sndImpact.SoundId = "rbxassetid://135938385687045"  -- impact arrivée
+			sndImpact.SoundId = "rbxassetid://135938385687045"
 			sndImpact.Volume = 1; sndImpact.PlaybackSpeed = 0.9
 			task.delay(0.05, function() sndImpact:Play() end)
 			Debris:AddItem(sndImpact, 2)
@@ -581,18 +573,18 @@ UIS.InputBegan:Connect(function(input, gpe)
 end)
 
 -- ================================================
--- PAGE PLAYER
+
 -- ================================================
 createSection(pages.Player, "Ciblage")
 
--- Conteneur recherche joueur (input + bouton refresh)
+-- Player search container (input + refresh button)
 local searchRow = Instance.new("Frame", pages.Player)
 searchRow.Size = UDim2.new(1, 0, 0, 38)
 searchRow.BackgroundTransparency = 1
 searchRow.BorderSizePixel = 0
 searchRow.LayoutOrder = 1
 
--- Champ texte de recherche
+-- Search text field
 local ddFrame = Instance.new("Frame", searchRow)
 ddFrame.Size = UDim2.new(1, -44, 1, 0)
 ddFrame.Position = UDim2.new(0, 0, 0, 0)
@@ -613,7 +605,7 @@ searchBox.TextSize = 12
 searchBox.TextXAlignment = Enum.TextXAlignment.Left
 searchBox.ClearTextOnFocus = false
 
--- Bouton Refresh
+-- Refresh button
 local refreshFrame = Instance.new("Frame", searchRow)
 refreshFrame.Size = UDim2.new(0, 38, 1, 0)
 refreshFrame.Position = UDim2.new(1, -38, 0, 0)
@@ -636,7 +628,7 @@ refreshBtn.MouseLeave:Connect(function()
 	TweenService:Create(refreshFrame, TweenInfo.new(0.12), {BackgroundColor3 = currentTheme.Accent}):Play()
 end)
 
--- Liste déroulante résultats
+-- Results drop-down list
 local ddList = Instance.new("ScrollingFrame", pages.Player)
 ddList.Size = UDim2.new(1, 0, 0, 0)
 ddList.BackgroundColor3 = currentTheme.Panel
@@ -651,7 +643,7 @@ Instance.new("UIListLayout", ddList).Padding = UDim.new(0, 2)
 
 local targetPlayer = nil
 
--- Sélectionne un joueur et ferme la liste
+-- Select a player and close the list
 local function selectPlayer(p)
 	targetPlayer = p
 	searchBox.Text = p.Name
@@ -660,7 +652,7 @@ local function selectPlayer(p)
 	task.wait(0.15); ddList.Visible = false
 end
 
--- Filtre et peuple la liste selon le texte saisi
+-- Filter and populate the list according to the entered text.
 local function updateDD(filter)
 	filter = filter and filter:lower() or ""
 	for _, c in pairs(ddList:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
@@ -691,23 +683,22 @@ local function updateDD(filter)
 	end
 end
 
--- Ouvre/refresh la liste complète
+-- Open/refresh the full list
 local function refreshDD()
 	searchBox.Text = ""
 	updateDD("")
 end
 
--- Événements champ texte
+-- Text field events
 searchBox:GetPropertyChangedSignal("Text"):Connect(function()
 	updateDD(searchBox.Text)
 end)
 
--- TAB ou Entrée → sélectionne le premier résultat visible
+-- Press TAB or Enter → selects the first visible result
 searchBox.FocusLost:Connect(function(enterPressed)
 	if enterPressed then
 		for _, c in pairs(ddList:GetChildren()) do
 			if c:IsA("TextButton") then
-				-- trouve le joueur correspondant
 				local name = c.Text:gsub("^%s+", "")
 				local p = Players:FindFirstChild(name)
 				if p then selectPlayer(p) end
@@ -731,19 +722,19 @@ UIS.InputBegan:Connect(function(input, gpe)
 	end
 end)
 
--- Bouton refresh
+-- Refresg button
 refreshBtn.MouseButton1Click:Connect(function()
 	refreshDD()
 end)
 
--- Ouvre la liste au focus
+-- Open the list to focus
 searchBox.Focused:Connect(function()
 	updateDD(searchBox.Text)
 end)
 
 createSection(pages.Player, "Actions")
 
--- Info panel joueur cible
+-- Target player panel information
 local infoPanel = Instance.new("Frame", pages.Player)
 infoPanel.Size = UDim2.new(1, 0, 0, 60)
 infoPanel.BackgroundColor3 = currentTheme.Panel
@@ -783,7 +774,7 @@ infoHP.Font = Enum.Font.Gotham
 infoHP.TextSize = 10
 infoHP.TextXAlignment = Enum.TextXAlignment.Left
 
--- Met à jour le panel quand targetPlayer change
+-- Updates the panel when targetPlayer changes
 local _origSelectPlayer = selectPlayer
 selectPlayer = function(p)
 	_origSelectPlayer(p)
@@ -798,7 +789,7 @@ selectPlayer = function(p)
 	end
 end
 
--- Update HP en live sur le panel
+-- HP update live on the panel
 RunService.Heartbeat:Connect(function()
 	if targetPlayer and targetPlayer.Character then
 		local hum = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -836,14 +827,14 @@ createBtn(pages.Player, "🚀  Me TP vers le joueur", currentTheme.Button, 6, fu
 		pcall(function() myHRP.CFrame = theirHRP.CFrame * CFrame.new(2, 2, 0) end)
 	end
 end)
--- Chat Spy : écoute les messages du joueur cible via TextChatService ou legacy chat
+-- Chat Spy: Listens to the target player's messages via TextChatService or legacy chat
 local chatSpyConn = nil
 local chatSpyTarget = nil
 
 local function startChatSpy(p)
 	if chatSpyConn then chatSpyConn:Disconnect(); chatSpyConn = nil end
 	chatSpyTarget = p
-	-- Tente d'utiliser TextChatService (nouveaux jeux Roblox)
+	-- Try using TextChatService (new Roblox games)
 	local TCS = game:GetService("TextChatService")
 	if TCS and TCS.MessageReceived then
 		chatSpyConn = TCS.MessageReceived:Connect(function(msg)
@@ -869,7 +860,7 @@ createBtn(pages.Player, "💬  Chat Spy ON/OFF", currentTheme.Button, 7, functio
 end)
 
 -- ================================================
--- PAGE PERSO
+
 -- ================================================
 createSection(pages.Perso, "🏃  Mouvement")
 
@@ -881,7 +872,7 @@ local function applyMovement(char)
 	if not hum then return end
 	hum.WalkSpeed = savedWalkSpeed
 	hum.JumpPower = savedJumpPower
-	hum.JumpHeight = savedJumpPower * 0.3  -- fallback JumpHeight
+	hum.JumpHeight = savedJumpPower * 0.3
 end
 
 player.CharacterAdded:Connect(function(char)
@@ -1001,21 +992,21 @@ end)
 
 createSection(pages.Perso, "🛡  Survie")
 
--- God Mode — 3 méthodes alternatives
+-- God Mode — 3 methods
 local godConn = nil
 local godMethod = 1
 
 local function applyGodMethod(hum)
 	if godMethod == 1 then
-		-- Méthode 1 : forcer Health = MaxHealth chaque Heartbeat
+		-- Méthode 1 : forcer Health = MaxHealth
 		hum.Health = hum.MaxHealth
 	elseif godMethod == 2 then
-		-- Méthode 2 : MaxHealth très élevé + Health
+		-- Méthode 2 : MaxHealth high + Health
 		hum.MaxHealth = math.huge
 		hum.Health = math.huge
 	elseif godMethod == 3 then
-		-- Méthode 3 : HealthChanged reset immédiat
-		-- (connexion séparée gérée dans le toggle)
+		-- Méthode 3 : HealthChanged immediate reset
+		-- (separate connection managed in the toggle)
 	end
 end
 
@@ -1028,7 +1019,6 @@ createToggle(pages.Perso, "🛡  God Mode (invincible)", 6, function(state)
 			local hum = char:FindFirstChildOfClass("Humanoid")
 			if hum then
 				pcall(applyGodMethod, hum)
-				-- Méthode 3 en supplément : HealthChanged
 				if godMethod == 3 then
 					hum:SetAttribute("_godHook", true)
 					if not hum:GetAttribute("_godConn") then
@@ -1066,25 +1056,24 @@ end)
 createSection(pages.Perso, "🎯  Combat")
 
 -- ================================================
--- AIMBOT — refait complet
--- smooth, moins agressif, toutes touches
+
 -- ================================================
 local aimEnabled   = false
 local aimActive    = false
 local aimConn      = nil
-local aimMode      = "hold"    -- "hold" ou "toggle"
-local aimKey       = "Mouse2"  -- défaut clic droit
-local aimSmooth    = 0.08      -- 0.01 = très doux, 0.3 = rapide
-local aimFOV       = 250       -- rayon FOV en pixels
+local aimMode      = "hold"
+local aimKey       = "Mouse2"
+local aimSmooth    = 0.08
+local aimFOV       = 250
 
--- Toutes les touches souris possibles
+-- All possible mouse buttons
 local MOUSE_KEYS = {
 	{ label = "Clic Droit  (Mouse2)",   id = "Mouse2"  },
 	{ label = "Clic Gauche  (Mouse1)",  id = "Mouse1"  },
 	{ label = "Clic Molette  (Mouse3)", id = "Mouse3"  },
 }
 
--- Toutes les touches clavier (KeyCode.Name valides Roblox)
+-- All valid Roblo keyboard keys (KeyCode.Name)
 local KEYBOARD_KEYS = {
 	-- Lettres
 	"A","B","C","D","E","F","G","H","I","J","K","L","M",
@@ -1107,7 +1096,7 @@ local KEYBOARD_KEYS = {
 	"Semicolon","Quote","Comma","Period","Slash","Backquote",
 }
 
--- Vérifie si un input correspond à la touche aim
+-- Check if an input corresponds to the aim key
 local function isAimInput(input, began)
 	if aimKey == "Mouse1" then
 		return input.UserInputType == Enum.UserInputType.MouseButton1
@@ -1121,7 +1110,7 @@ local function isAimInput(input, began)
 	end
 end
 
--- Trouve la cible dans le FOV
+-- Find the target in the FOV
 local function getTarget()
 	local cam   = workspace.CurrentCamera
 	local myHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -1152,10 +1141,10 @@ local function getTarget()
 	return best
 end
 
--- Boucle aim : 3 méthodes alternatives selon le jeu
--- Méthode 1 : cam.CFrame direct (marche sur la plupart des jeux)
--- Méthode 2 : mouse.Move simulation via UserInputService
--- Méthode 3 : HumanoidRootPart CFrame orient vers cible (fallback)
+-- Aim loop: 3 alternative methods depending on the game
+-- Method 1: cam.CFrame direct (works on most games)
+-- Method 2: mouse.Move simulation via UserInputService
+-- Method 3: HumanoidRootPart CFrame orients towards target (fallback)
 local aimMethod = 1   -- méthode active
 
 local function applyAim(head)
@@ -1175,7 +1164,7 @@ local function applyAim(head)
 		cam.CameraType = prev
 
 	elseif aimMethod == 3 then
-		-- Rotation HRP vers cible (utile si cam est bloquée)
+		-- Rotate from the camera to the target (useful if the camera is blocked)
 		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			local dir = (head.Position - hrp.Position) * Vector3.new(1, 0, 1)
@@ -1197,7 +1186,7 @@ local function startAim()
 		if not (t and t.Character) then return end
 		local head = t.Character:FindFirstChild("Head")
 		if not head then return end
-		pcall(applyAim, head)   -- pcall = si une méthode crash, pas de freeze
+		pcall(applyAim, head)
 	end)
 end
 
@@ -1206,7 +1195,7 @@ local function stopAim()
 	aimActive = false
 end
 
--- Écoute InputBegan/Ended
+-- Listen InputBegan/Ended
 UIS.InputBegan:Connect(function(input, gpe)
 	if gpe or not aimEnabled then return end
 	if isAimInput(input) then
@@ -1224,11 +1213,11 @@ UIS.InputEnded:Connect(function(input)
 end)
 
 -- ================================================
--- UI AIMBOT
+
 -- ================================================
 createSection(pages.Perso, "🎯  Aim Lock")
 
--- Déclaration AVANT usage
+-- Declaration BEFORE use
 local aimStatusLabel = Instance.new("TextLabel", pages.Perso)
 aimStatusLabel.Size  = UDim2.new(1, 0, 0, 18)
 aimStatusLabel.BackgroundTransparency = 1
@@ -1244,13 +1233,13 @@ local function updateAimStatus()
 end
 updateAimStatus()
 
--- Toggle principal
+-- Main Toggle
 createToggle(pages.Perso, "🎯  Aim Lock ON / OFF", 101, function(state)
 	aimEnabled = state
 	if state then startAim() else stopAim() end
 end)
 
--- Slider smooth (vitesse de visée)
+-- Slider smooth (aiming speed)
 createSlider(pages.Perso, "🎚  Smooth (douceur)", 1, 30, 8, 102, function(val)
 	aimSmooth = val / 100
 	updateAimStatus()
@@ -1274,7 +1263,7 @@ createBtn(pages.Perso, "🔧  Méthode : " .. methodNames[aimMethod], currentThe
 	showNotification("🎯  Méthode : " .. methodNames[aimMethod], 2)
 end)
 
--- Dropdown générique (déclaré ici, utilisé pour souris et clavier)
+-- Generic dropdown (declared here, used for mouse and keyboard)
 local function mkDropdown(parent, label, items, defaultIdx, order, onPick)
 	local selIdx = defaultIdx
 	local open   = false
@@ -1348,7 +1337,7 @@ local function mkDropdown(parent, label, items, defaultIdx, order, onPick)
 	end)
 end
 
--- Labels pour les dropdowns
+-- Labels for dropdowns
 local MOUSE_LABELS = {}
 for _, m in ipairs(MOUSE_KEYS) do table.insert(MOUSE_LABELS, m.label) end
 
@@ -1374,7 +1363,7 @@ local function applyScale(val)
 	if not char then return end
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if not hum then return end
-	-- Attendre que les ValueObjects soient chargés
+	-- Wait for the ValueObjects to be loaded.
 	local function setScale()
 		local bd = hum:FindFirstChild("BodyDepthScale")
 		local bh = hum:FindFirstChild("BodyHeightScale")
@@ -1388,7 +1377,7 @@ local function applyScale(val)
 	setScale()
 end
 
--- Applique aussi au respawn
+-- Also applies to respawning
 player.CharacterAdded:Connect(function(char)
 	task.wait(0.5)
 	applyScale(currentScale * 100)
@@ -1399,7 +1388,7 @@ createSlider(pages.Perso, "📐  Taille du personnage", 50, 200, 100, 9, functio
 end)
 
 -- ================================================
--- PAGE WORLD
+
 -- ================================================
 createSection(pages.World, "☀  Environnement")
 
@@ -1442,10 +1431,10 @@ createToggle(pages.World, "🌈  Ciel Rainbow", 4, function(state)
 	end
 end)
 
--- Brouillard
-createSection(pages.World, "🌫  Météo")
+-- Fog
+createSection(pages.World, "🌫  Fog")
 
-createSection(pages.World, "🌫  Météo & Effets")
+createSection(pages.World, "🌫  Fog & Effects")
 
 local function getAtmo()
 	local a = Lighting:FindFirstChildOfClass("Atmosphere")
@@ -1468,7 +1457,7 @@ createToggle(pages.World, "☁  Brouillard léger", 6, function(state)
 	}):Play()
 end)
 
--- Pluie : ParticleEmitter via rbxassetid connu + son ambiance
+-- Rain: ParticleEmitter via rbxassetid known + its ambiance
 createToggle(pages.World, "🌧  Pluie", 7, function(state)
 	RunService:UnbindFromRenderStep("AdminRain")
 	local old = workspace:FindFirstChild("AdminRain")
@@ -1481,7 +1470,7 @@ createToggle(pages.World, "🌧  Pluie", 7, function(state)
 	rain.Size = Vector3.new(300, 1, 300)
 
 	local ps = Instance.new("ParticleEmitter", rain)
-	ps.Texture      = "rbxassetid://3125510843"   -- goutte de pluie
+	ps.Texture      = "rbxassetid://11552439884"
 	ps.Rate         = 800
 	ps.Lifetime     = NumberRange.new(0.8, 1.4)
 	ps.Speed        = NumberRange.new(80, 100)
@@ -1493,7 +1482,7 @@ createToggle(pages.World, "🌧  Pluie", 7, function(state)
 	ps.LightEmission = 0
 
 	local snd = Instance.new("Sound", rain)
-	snd.SoundId = "rbxassetid://1660819739"   -- ambiance pluie
+	snd.SoundId = "rbxassetid://1660819739"
 	snd.Volume = 0.7; snd.Looped = true; snd:Play()
 
 	RunService:BindToRenderStep("AdminRain", 1, function()
@@ -1504,7 +1493,7 @@ createToggle(pages.World, "🌧  Pluie", 7, function(state)
 	end)
 end)
 
--- Neige : une seule instance, texture correcte
+-- Snow: only one instance, correct texture
 createToggle(pages.World, "❄  Neige", 8, function(state)
 	RunService:UnbindFromRenderStep("AdminSnow")
 	local old = workspace:FindFirstChild("AdminSnow")
@@ -1517,7 +1506,7 @@ createToggle(pages.World, "❄  Neige", 8, function(state)
 		snow.Size = Vector3.new(200, 1, 200)
 
 		local ps = Instance.new("ParticleEmitter", snow)
-		ps.Texture      = "rbxassetid://2344870656"   -- flocon de neige
+		ps.Texture      = "rbxassetid://15528629762"
 		ps.Rate         = 300
 		ps.Lifetime     = NumberRange.new(3, 5)
 		ps.Speed        = NumberRange.new(10, 20)
@@ -1605,10 +1594,10 @@ createBtn(pages.World, "🔒  Reset FPS (60)", currentTheme.Button, 15, function
 end)
 
 -- ================================================
--- PAGE SETTINGS
+
 -- ================================================
 
--- Taille stockée pour éviter le bug AbsoluteSize+tween
+-- Size stored to avoid the AbsoluteSize+tween bug
 local menuW, menuH = 360, 480
 
 local function applyMenuSize(w, h)
@@ -1616,7 +1605,7 @@ local function applyMenuSize(w, h)
 	main.Size = UDim2.new(0, menuW, 0, menuH)
 end
 
--- Fonction centrale d'application du thème
+-- Central function of theme application
 local function applyTheme(t)
 	currentTheme = t
 	main.BackgroundColor3 = t.BG
@@ -1657,7 +1646,7 @@ createBtn(pages.Settings, "↩  Reset taille", currentTheme.Button, 7, function(
 end)
 createSection(pages.Settings, "💾  Configuration")
 
--- Sauvegarde / chargement via writefile/readfile (exécuteurs Roblox)
+-- Save/load via writefile/readfile (Roblox executors)
 local CONFIG_FILE = "AdminMenu_config.json"
 
 local function getConfig()
@@ -1734,7 +1723,7 @@ end)
 
 createSection(pages.Settings, "ℹ  Info")
 local infoLbl = Instance.new("TextLabel", pages.Settings)
-infoLbl.Text = "🎮  [B]  → Ouvrir / Fermer\n🖱  Glisser n'importe où  → Déplacer\n⚡  Admin Menu  v6.0  •  " .. player.Name
+infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Slide anywhere → Move\n🌐 вκ乙 HUB v2.6  •  " .. player.Name
 infoLbl.Size = UDim2.new(1, 0, 0, 60)
 infoLbl.BackgroundTransparency = 1
 infoLbl.TextColor3 = currentTheme.SubText
@@ -1745,12 +1734,12 @@ infoLbl.TextYAlignment = Enum.TextYAlignment.Top
 infoLbl.LayoutOrder = 10
 
 -- ================================================
--- NOTIFICATION TOAST
+
 -- ================================================
 local function showNotification(message, duration)
 	duration = duration or 4
 
-	-- Conteneur toast
+	-- Toast container
 	local toastGui = Instance.new("ScreenGui", playerGui)
 	toastGui.Name = "AdminToast"
 	toastGui.ResetOnSpawn = false
@@ -1758,19 +1747,19 @@ local function showNotification(message, duration)
 
 	local toast = Instance.new("Frame", toastGui)
 	toast.Size = UDim2.new(0, 280, 0, 54)
-	toast.Position = UDim2.new(1, 10, 1, -80) -- hors écran à droite
+	toast.Position = UDim2.new(1, 10, 1, -80)
 	toast.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 	toast.BorderSizePixel = 0
 	toast.AnchorPoint = Vector2.new(1, 1)
 	Instance.new("UICorner", toast).CornerRadius = UDim.new(0, 12)
 
-	-- Bordure accentuée
+	-- Accented border
 	local toastStroke = Instance.new("UIStroke", toast)
 	toastStroke.Color = Color3.fromRGB(100, 80, 255)
 	toastStroke.Thickness = 1.5
 	toastStroke.Transparency = 0.3
 
-	-- Icône colorée à gauche
+	-- Colorful icon on the left
 	local icon = Instance.new("Frame", toast)
 	icon.Size = UDim2.new(0, 4, 1, -16)
 	icon.Position = UDim2.new(0, 8, 0.5, 0)
@@ -1779,7 +1768,7 @@ local function showNotification(message, duration)
 	icon.BorderSizePixel = 0
 	Instance.new("UICorner", icon).CornerRadius = UDim.new(1, 0)
 
-	-- Texte
+	-- Text
 	local toastLabel = Instance.new("TextLabel", toast)
 	toastLabel.Text = message
 	toastLabel.Size = UDim2.new(1, -26, 1, 0)
@@ -1792,12 +1781,12 @@ local function showNotification(message, duration)
 	toastLabel.TextWrapped = true
 	toastLabel.RichText = true
 
-	-- Slide-in depuis la droite
+	-- Slide-in from the right
 	TweenService:Create(toast, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 		Position = UDim2.new(1, -16, 1, -80)
 	}):Play()
 
-	-- Barre de progression
+	-- Progress bar
 	local progress = Instance.new("Frame", toast)
 	progress.Size = UDim2.new(1, 0, 0, 3)
 	progress.Position = UDim2.new(0, 0, 1, -3)
@@ -1810,7 +1799,7 @@ local function showNotification(message, duration)
 		Size = UDim2.new(0, 0, 0, 3)
 	}):Play()
 
-	-- Attendre puis slide-out et détruire
+	-- Wait, then slide out and destroy
 	task.delay(duration, function()
 		TweenService:Create(toast, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
 			Position = UDim2.new(1, 10, 1, -80)
@@ -1820,11 +1809,10 @@ local function showNotification(message, duration)
 	end)
 end
 
--- Affiche la notif au lancement
-showNotification("⚡  Appuie sur  <b>[B]</b>  pour ouvrir le menu", 5)
+-- Displays the notification on launch
+showNotification("👉𝐁 Press <b>[B]</b> to open the menu", 5)
 
 -- ================================================
--- ANIMATION OUVERTURE
 -- ================================================
 local function openMenu()
 	gui.Enabled = true
@@ -1858,13 +1846,12 @@ UIS.InputBegan:Connect(function(input, gpe)
 end)
 
 -- ================================================
--- NUKE MODE — fusée + explosion impact
 -- ================================================
 local nukeEnabled = false
 local nukeConn = nil
 
 local function spawnExplosionFX(pos)
-	-- Boule de feu centrale
+	-- Central fireball
 	local ball = Instance.new("Part", workspace)
 	ball.Shape = Enum.PartType.Ball
 	ball.Size = Vector3.new(2,2,2)
@@ -1877,7 +1864,7 @@ local function spawnExplosionFX(pos)
 	}):Play()
 	Debris:AddItem(ball, 0.65)
 
-	-- Anneau d'onde de choc
+	-- Shockwave ring
 	local ring = Instance.new("Part", workspace)
 	ring.Size = Vector3.new(2, 0.5, 2)
 	ring.CFrame = CFrame.new(pos)
@@ -1890,7 +1877,7 @@ local function spawnExplosionFX(pos)
 	}):Play()
 	Debris:AddItem(ring, 0.75)
 
-	-- Fumée noire
+	-- Black smoke
 	for i = 1, 8 do
 		local smoke = Instance.new("Part", workspace)
 		smoke.Shape = Enum.PartType.Ball
@@ -1907,7 +1894,7 @@ local function spawnExplosionFX(pos)
 		Debris:AddItem(smoke, 1.6)
 	end
 
-	-- Son explosion
+	-- His explosion
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then
 		local boom = Instance.new("Sound", hrp)
@@ -1926,27 +1913,27 @@ local function startNuke()
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if hum then hum:ChangeState(Enum.HumanoidStateType.Physics) end
 
-	-- LinearVelocity (plus puissant que BodyVelocity sur Roblox moderne)
+	-- LinearVelocity (more powerful than BodyVelocity on modern Roblox)
 	local att = Instance.new("Attachment", hrp)
 	att.Name = "NukeAtt"
 	local lv = Instance.new("LinearVelocity", hrp)
 	lv.Name = "NukeBV"
 	lv.Attachment0 = att
-	lv.VectorVelocity = Vector3.new(0, 50000, 0)   -- ~50 km/s
+	lv.VectorVelocity = Vector3.new(0, 150, 0)
 	lv.MaxForce = math.huge
 
-	-- Sons fusée (2 couches pour un effet plus puissant)
+	-- Rocket sounds (2 layers for a more powerful effect)
 	local snd = Instance.new("Sound", hrp)
 	snd.Name = "NukeSound"
-	snd.SoundId = "rbxassetid://84792688181059"   -- rocket puissant
+	snd.SoundId = "rbxassetid://84792688181059"
 	snd.Volume = 4; snd.Looped = true; snd:Play()
 
 	local sndBoost = Instance.new("Sound", hrp)
 	sndBoost.Name = "NukeBoost"
-	sndBoost.SoundId = "rbxassetid://84792688181059"  -- thruster grave
+	sndBoost.SoundId = "rbxassetid://84792688181059"
 	sndBoost.Volume = 2.5; sndBoost.Looped = true; sndBoost:Play()
 
-	-- Traînée de feu
+	-- Trail of fire
 	nukeConn = RunService.Heartbeat:Connect(function()
 		local c = player.Character
 		if not c then return end
@@ -1982,7 +1969,7 @@ local function stopNuke()
 	end
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if hum then hum:ChangeState(Enum.HumanoidStateType.Freefall) end
-	-- Explosion au point d'impact quand on atterrit
+	-- Explosion at the point of impact upon landing
 	task.spawn(function()
 		task.wait(1.2)
 		if char and hrp then
@@ -1991,7 +1978,7 @@ local function stopNuke()
 	end)
 end
 
--- Toggle Nuke dans la page Perso
+-- Toggle Nuke on the Personal page
 createSection(pages.Perso, "💥  Chaos & Fun")
 createToggle(pages.Perso, "🚀  NUKE MODE  (propulsion + explosion)", 10, function(state)
 	nukeEnabled = state
@@ -2002,20 +1989,20 @@ createBtn(pages.Perso, "💣  Explosion sur place", currentTheme.Danger, 11, fun
 	local hrp  = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 
-	-- Son d'explosion immédiat (2 couches : impact + basse)
+	-- Immediate explosion sound (2 layers: impact + bass)
 	local boom1 = Instance.new("Sound", hrp)
 	boom1.SoundId = "rbxassetid://84792688181059"; boom1.Volume = 5
 	boom1.RollOffMaxDistance = 300; boom1:Play()
 	Debris:AddItem(boom1, 4)
 
 	local boom2 = Instance.new("Sound", hrp)
-	boom2.SoundId = "rbxassetid://3716468774"; boom2.Volume = 3  -- basse explosion
+	boom2.SoundId = "rbxassetid://3716468774"; boom2.Volume = 3
 	boom2.RollOffMaxDistance = 200; boom2:Play()
 	Debris:AddItem(boom2, 3)
 
 	spawnExplosionFX(hrp.Position)
 
-	-- Tuer le perso (via Humanoid)
+	-- Kill the character (via Humanoid)
 	local hum = char:FindFirstChildOfClass("Humanoid")
 	if hum then
 		task.delay(0.1, function()
@@ -2031,7 +2018,6 @@ createBtn(pages.Perso, "🔄  Reset personnage", currentTheme.Button, 12, functi
 end)
 
 -- ================================================
--- PAGE ESP
 -- ================================================
 local espState = {
 	boxes     = false,
@@ -2043,16 +2029,16 @@ local espState = {
 	skeletons = false,
 	chams     = false,
 	healthBar = false,
-	items     = false,   -- ESP armes/outils au sol
+	items     = false,
 }
 local espObjects = {}
 local espConn    = nil
-local espItemObjs = {}  -- { [instance] = BillboardGui }
+local espItemObjs = {}
 
 local ESP_COLOR_ALLY  = Color3.fromRGB(50, 200, 100)
 local ESP_COLOR_ENEMY = Color3.fromRGB(255, 60, 60)
 
--- Nettoie ESP d'un joueur
+-- Cleans ESP from a player
 local function clearESPFor(p)
 	if espObjects[p] then
 		for _, obj in ipairs(espObjects[p]) do
@@ -2073,7 +2059,7 @@ local function mkBB(parent, name, w, h, offsetY, maxDist)
 	return bb
 end
 
--- Helper label compact
+-- Compact label helper
 local function mkLbl(parent, txt, size, color)
 	local l = Instance.new("TextLabel", parent)
 	l.Size = UDim2.new(1,0,1,0)
@@ -2102,9 +2088,9 @@ local function buildESPFor(p)
 	local color  = isAlly and ESP_COLOR_ALLY or ESP_COLOR_ENEMY
 	local objs   = {}
 
-	-- CHAMS (Highlight natif Roblox — fonctionne partout)
+	-- CHAMS (Native Roblox Highlighter — works everywhere)
 	if espState.chams then
-		-- Supprimer ancien highlight si présent
+		-- Remove old highlight if present
 		local old = char:FindFirstChild("ESP_Highlight")
 		if old then old:Destroy() end
 		local hl = Instance.new("Highlight", char)
@@ -2141,7 +2127,7 @@ local function buildESPFor(p)
 		table.insert(objs, bb)
 	end
 
-	-- NOM (compact, petit)
+	-- NAME (compact, small)
 	if espState.names then
 		local bb = mkBB(hrp, "ESP_Name", 100, 16, 3.2, 500)
 		local lbl = mkLbl(bb, p.Name, 9, color)
@@ -2149,7 +2135,7 @@ local function buildESPFor(p)
 		table.insert(objs, bb)
 	end
 
-	-- SANTÉ texte
+	-- HEALTH text
 	if espState.health and hum then
 		local bb = mkBB(hrp, "ESP_HP", 80, 12, 2.6, 400)
 		local lbl = mkLbl(bb, math.floor(hum.Health) .. "hp", 8,
@@ -2163,7 +2149,7 @@ local function buildESPFor(p)
 		table.insert(objs, bb)
 	end
 
-	-- BARRE DE SANTÉ (verticale, fine)
+	-- HEALTH BAR (vertical, thin)
 	if espState.healthBar and hum then
 		local bb = mkBB(hrp, "ESP_Bar", 4, 50, 0, 400)
 		bb.StudsOffset = Vector3.new(-1.2, 0, 0)
@@ -2196,7 +2182,7 @@ local function buildESPFor(p)
 		table.insert(objs, bb)
 	end
 
-	-- TRACER (point au pied)
+	-- TRACER (point at the foot)
 	if espState.tracers then
 		local bb = mkBB(hrp, "ESP_Tracer", 6, 6, -3, 600)
 		local dot = Instance.new("Frame", bb)
@@ -2206,7 +2192,7 @@ local function buildESPFor(p)
 		table.insert(objs, bb)
 	end
 
-	-- SQUELETTE (Beams) — fonctionne R6 et R15
+	-- SKELETON (Beams) — works on R6 and R15
 	if espState.skeletons then
 		local JOINTS_R15 = {
 			{"Head","UpperTorso"},{"UpperTorso","LowerTorso"},
@@ -2242,10 +2228,9 @@ local function buildESPFor(p)
 end
 
 -- ================================================
--- ESP ITEMS (armes/outils posés au sol)
 -- ================================================
 local function refreshItemESP()
-	-- Nettoyer anciens
+	-- Clean old
 	for inst, bb in pairs(espItemObjs) do
 		if bb and bb.Parent then bb:Destroy() end
 	end
@@ -2253,10 +2238,10 @@ local function refreshItemESP()
 
 	if not espState.items then return end
 
-	-- Scanner workspace pour les Tools et les Parts nommées "Handle"
+	-- Scanner workspace for Tools and Parts named "Handle"
 	for _, obj in ipairs(workspace:GetDescendants()) do
 		if obj:IsA("Tool") and not obj.Parent:IsA("Model") then
-			-- Tool posé au sol
+			-- Tool placed on the ground
 			local handle = obj:FindFirstChild("Handle")
 			if handle and handle:IsA("BasePart") then
 				local bb = mkBB(handle, "ESP_Item", 120, 14, 0.5, 300)
@@ -2268,7 +2253,7 @@ local function refreshItemESP()
 	end
 end
 
--- Rafraîchir items ESP périodiquement
+-- Refresh ESP items periodically
 task.spawn(function()
 	while true do
 		task.wait(3)
@@ -2276,7 +2261,7 @@ task.spawn(function()
 	end
 end)
 
--- Met à jour distance chaque seconde
+-- Updates distance every second
 local function updateDistances()
 	local myHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not myHRP then return end
@@ -2296,7 +2281,7 @@ local function updateDistances()
 	end
 end
 
--- Reconstruit tout l'ESP quand un état change
+-- Rebuilds the entire ESP when a state changes
 local function refreshAllESP()
 	for _, p in ipairs(Players:GetPlayers()) do
 		buildESPFor(p)
@@ -2310,7 +2295,7 @@ local function toggleESP(key, state)
 	refreshAllESP()
 end
 
--- Helper dropdown couleur ESP
+-- Helper dropdown color ESP
 local function createColorDropdown(parent, label, order, defaultColor, onChange)
 	local colors = {
 		{"Rouge",  Color3.fromRGB(255,60,60)},
@@ -2326,7 +2311,7 @@ local function createColorDropdown(parent, label, order, defaultColor, onChange)
 	local selected = defaultColor
 	local open = false
 
-	-- Bouton principal
+	-- Main button
 	local headerF = Instance.new("Frame", parent)
 	headerF.Size = UDim2.new(1,0,0,34)
 	headerF.BackgroundColor3 = currentTheme.Button
@@ -2357,7 +2342,7 @@ local function createColorDropdown(parent, label, order, defaultColor, onChange)
 	arrow.Text = "▾"; arrow.TextColor3 = currentTheme.SubText
 	arrow.Font = Enum.Font.GothamBold; arrow.TextSize = 13
 
-	-- Liste déroulante
+	-- Drop-down list
 	local listF = Instance.new("Frame", parent)
 	listF.Size = UDim2.new(1,0,0,0)
 	listF.BackgroundColor3 = currentTheme.Panel
@@ -2417,7 +2402,7 @@ local function createColorDropdown(parent, label, order, defaultColor, onChange)
 	end)
 end
 
--- UI ESP dans pages.ESP
+-- UI ESP in pages.ESP
 createSection(pages.ESP, "⚡  Raccourcis")
 createBtn(pages.ESP, "⚡  Tout activer", currentTheme.Accent, 0, function()
 	for k in pairs(espState) do espState[k] = true end
@@ -2458,13 +2443,13 @@ createColorDropdown(pages.ESP, "🔵  Couleur Alliés", 21,
 	function(c) ESP_COLOR_ALLY = c; refreshAllESP() end
 )
 
--- PAGE AUTRE — Crédits
+-- OTHER PAGE — Credits
 -- ================================================
 createSection(pages.Autre, "👑  Crédits")
 
 local credits = {
-	{"👑  Owner",       "lopine06"},
-	{"🤝  Contributeur","Toutes les personnes qui utilisent le menu"},
+	{"👑  Owner","вκ乙"},
+	{"🤝  Contributor","All people use menu thx you !"},
 }
 
 for i, entry in ipairs(credits) do
@@ -2504,13 +2489,13 @@ createSection(pages.Autre, "ℹ  Version")
 local verLabel = Instance.new("TextLabel", pages.Autre)
 verLabel.Size = UDim2.new(1, 0, 0, 40)
 verLabel.BackgroundTransparency = 1
-verLabel.Text = "⚡  Admin Menu  v8.0\n🔑  Touche [B] pour ouvrir/fermer"
+verLabel.Text = "🌐 вκ乙 HUB  v2.6\n👉𝐁 Press [B] to open/close"
 verLabel.TextColor3 = currentTheme.SubText
 verLabel.Font = Enum.Font.Gotham
 verLabel.TextSize = 11
 verLabel.TextWrapped = true
 verLabel.LayoutOrder = 99
-	-- Écoute arrivée/départ de persos
+	-- Listening to characters' arrival/departure
 	Players.PlayerAdded:Connect(function(p)
 		p.CharacterAdded:Connect(function() task.wait(1); buildESPFor(p) end)
 	end)
@@ -2524,7 +2509,7 @@ verLabel.LayoutOrder = 99
 		end
 	end)
 
-	-- Rebuild si perso respawn
+	-- Rebuild if character respawns
 	for _, p in ipairs(Players:GetPlayers()) do
 		if p ~= player then
 			p.CharacterAdded:Connect(function() task.wait(1); buildESPFor(p) end)
@@ -2533,7 +2518,7 @@ verLabel.LayoutOrder = 99
 	end
 
 
--- Démarre la boucle ESP
+-- Start the ESP loop
 local function startESP()
 	Players.PlayerAdded:Connect(function(p)
 		p.CharacterAdded:Connect(function() task.wait(1); buildESPFor(p) end)
@@ -2557,7 +2542,7 @@ end
 
 startESP()
 
--- Auto-load config au démarrage
+-- Auto-load config at startup
 task.spawn(function()
 	task.wait(0.5)
 	if readfile then
@@ -2566,7 +2551,7 @@ task.spawn(function()
 		end)
 		if ok and result then
 			applyConfig(result)
-			showNotification("📂  Config chargée automatiquement !", 3)
+			showNotification("📂 Config loaded automatically !", 3)
 		end
 	end
 end)
