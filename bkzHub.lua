@@ -146,7 +146,7 @@ title.TextSize = 15
 title.TextXAlignment = Enum.TextXAlignment.Left
 
 local subtitle = Instance.new("TextLabel", header)
-subtitle.Text = "v3.1  •  " .. player.Name
+subtitle.Text = "v3.2  •  " .. player.Name
 subtitle.Size = UDim2.new(1, -50, 0, 14)
 subtitle.Position = UDim2.new(0, 15, 0, 30)
 subtitle.BackgroundTransparency = 1
@@ -395,21 +395,24 @@ local function createSlider(parent, text, min, max, default, order, func)
 
 	local currentVal = default
 
-	local function setVal(val)
-		val = math.clamp(math.floor(val), min, max)
-		currentVal = val
-		local rel = (val - min) / (max - min)
+	local function setVal(val, fromSlider)
+		local display = math.floor(val)
+		if fromSlider then
+			display = math.clamp(display, min, max)
+		end
+		currentVal = display
+		local rel = math.clamp((display - min) / (max - min), 0, 1)
 		fill.Size = UDim2.new(rel, 0, 1, 0)
 		knob.Position = UDim2.new(rel, -7, 0.5, -7)
-		inputBox.Text = tostring(val)
-		func(val)
+		inputBox.Text = tostring(display)
+		func(display)
 	end
 
-	-- Manual input: press Enter or lose focus
-	inputBox.FocusLost:Connect(function(enterPressed)
+	-- Manual input: type any number, press Enter or lose focus
+	inputBox.FocusLost:Connect(function()
 		local num = tonumber(inputBox.Text)
 		if num then
-			setVal(num)
+			setVal(num, false)  -- no clamp for manual input
 		else
 			inputBox.Text = tostring(currentVal)
 		end
@@ -426,7 +429,7 @@ local function createSlider(parent, text, min, max, default, order, func)
 		local trackPos = track.AbsolutePosition.X
 		local trackSize = track.AbsoluteSize.X
 		local rel = math.clamp((input.Position.X - trackPos) / trackSize, 0, 1)
-		setVal(min + (max - min) * rel)
+		setVal(min + (max - min) * rel, true)
 	end
 
 	hitbox.MouseButton1Down:Connect(function() draggingSlider = true end)
@@ -1747,7 +1750,7 @@ end)
 
 createSection(pages.Settings, "ℹ  Info", 10)
 local infoLbl = Instance.new("TextLabel", pages.Settings)
-infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v3.1  •  " .. player.Name
+infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v3.2  •  " .. player.Name
 infoLbl.Size = UDim2.new(1, 0, 0, 60)
 infoLbl.BackgroundTransparency = 1
 infoLbl.TextColor3 = currentTheme.SubText
@@ -2514,7 +2517,7 @@ createSection(pages.Other, "ℹ  Version", 98)
 local verLabel = Instance.new("TextLabel", pages.Other)
 verLabel.Size = UDim2.new(1, 0, 0, 40)
 verLabel.BackgroundTransparency = 1
-verLabel.Text = "🌐 вκ乙 HUB  v3.1\n👉𝐁 Press [B] to open/close"
+verLabel.Text = "🌐 вκ乙 HUB  v3.2\n👉𝐁 Press [B] to open/close"
 verLabel.TextColor3 = currentTheme.SubText
 verLabel.Font = Enum.Font.Gotham
 verLabel.TextSize = 11
