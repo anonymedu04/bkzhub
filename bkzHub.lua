@@ -146,7 +146,7 @@ title.TextSize = 15
 title.TextXAlignment = Enum.TextXAlignment.Left
 
 local subtitle = Instance.new("TextLabel", header)
-subtitle.Text = "v2.6  •  " .. player.Name
+subtitle.Text = "v3.0  •  " .. player.Name
 subtitle.Size = UDim2.new(1, -50, 0, 14)
 subtitle.Position = UDim2.new(0, 15, 0, 30)
 subtitle.BackgroundTransparency = 1
@@ -350,7 +350,7 @@ local function createSlider(parent, text, min, max, default, order, func)
 
 	local lbl = Instance.new("TextLabel", frame)
 	lbl.Text = text
-	lbl.Size = UDim2.new(1, -50, 0, 24)
+	lbl.Size = UDim2.new(1, -110, 0, 24)
 	lbl.Position = UDim2.new(0, 12, 0, 4)
 	lbl.BackgroundTransparency = 1
 	lbl.TextColor3 = currentTheme.Text
@@ -358,19 +358,23 @@ local function createSlider(parent, text, min, max, default, order, func)
 	lbl.TextSize = 12
 	lbl.TextXAlignment = Enum.TextXAlignment.Left
 
-	local valLbl = Instance.new("TextLabel", frame)
-	valLbl.Text = tostring(default)
-	valLbl.Size = UDim2.new(0, 40, 0, 24)
-	valLbl.Position = UDim2.new(1, -50, 0, 4)
-	valLbl.BackgroundTransparency = 1
-	valLbl.TextColor3 = currentTheme.Accent
-	valLbl.Font = Enum.Font.GothamBold
-	valLbl.TextSize = 12
-	valLbl.TextXAlignment = Enum.TextXAlignment.Right
+	-- Editable input box
+	local inputBox = Instance.new("TextBox", frame)
+	inputBox.Size = UDim2.new(0, 56, 0, 20)
+	inputBox.Position = UDim2.new(1, -68, 0, 5)
+	inputBox.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+	inputBox.BorderSizePixel = 0
+	inputBox.TextColor3 = currentTheme.Accent
+	inputBox.Font = Enum.Font.GothamBold
+	inputBox.TextSize = 12
+	inputBox.Text = tostring(default)
+	inputBox.ClearTextOnFocus = false
+	inputBox.PlaceholderText = tostring(default)
+	Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 6)
 
 	local track = Instance.new("Frame", frame)
 	track.Size = UDim2.new(1, -24, 0, 6)
-	track.Position = UDim2.new(0, 12, 0, 36)
+	track.Position = UDim2.new(0, 12, 0, 42)
 	track.BackgroundColor3 = Color3.fromRGB(55,55,75)
 	track.BorderSizePixel = 0
 	Instance.new("UICorner", track).CornerRadius = UDim.new(1, 0)
@@ -389,6 +393,28 @@ local function createSlider(parent, text, min, max, default, order, func)
 	knob.BorderSizePixel = 0
 	Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
 
+	local currentVal = default
+
+	local function setVal(val)
+		val = math.clamp(math.floor(val), min, max)
+		currentVal = val
+		local rel = (val - min) / (max - min)
+		fill.Size = UDim2.new(rel, 0, 1, 0)
+		knob.Position = UDim2.new(rel, -7, 0.5, -7)
+		inputBox.Text = tostring(val)
+		func(val)
+	end
+
+	-- Manual input: press Enter or lose focus
+	inputBox.FocusLost:Connect(function(enterPressed)
+		local num = tonumber(inputBox.Text)
+		if num then
+			setVal(num)
+		else
+			inputBox.Text = tostring(currentVal)
+		end
+	end)
+
 	local draggingSlider = false
 	local hitbox = Instance.new("TextButton", track)
 	hitbox.Size = UDim2.new(1, 0, 0, 20)
@@ -400,11 +426,7 @@ local function createSlider(parent, text, min, max, default, order, func)
 		local trackPos = track.AbsolutePosition.X
 		local trackSize = track.AbsoluteSize.X
 		local rel = math.clamp((input.Position.X - trackPos) / trackSize, 0, 1)
-		local val = math.floor(min + (max - min) * rel)
-		fill.Size = UDim2.new(rel, 0, 1, 0)
-		knob.Position = UDim2.new(rel, -7, 0.5, -7)
-		valLbl.Text = tostring(val)
-		func(val)
+		setVal(min + (max - min) * rel)
 	end
 
 	hitbox.MouseButton1Down:Connect(function() draggingSlider = true end)
@@ -903,7 +925,7 @@ createToggle(pages.Personal, "🧊  Freeze (no move)", 4, function(state)
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then hrp.Anchored = state end
 end)
-createSection(pages.Personal, "🦅  Fly", 4)
+createSection(pages.Personal, "🦅  Fly", 5)
 
 local flyEnabled = false
 local flyBodyVel, flyBodyGyro
@@ -957,18 +979,18 @@ local function disableFly()
 	end
 end
 
-createToggle(pages.Personal, "🦅  Fly  (WASD + Space/Ctrl)", 5, function(state)
+createToggle(pages.Personal, "🦅  Fly  (WASD + Space/Ctrl)", 6, function(state)
 	flyEnabled = state
 	if state then enableFly() else disableFly() end
 end)
 
-createSlider(pages.Personal, "🦅  Fly Speed", 10, 5000, 40, 6, function(val)
+createSlider(pages.Personal, "🦅  Fly Speed", 10, 5000, 40, 7, function(val)
 	flySpeed = val
 end)
 
-createSection(pages.Personal, "👁  Collision & Visual", 6)
+createSection(pages.Personal, "👁  Collision & Visual", 8)
 
-createToggle(pages.Personal, "🕶  Noclip (walk through walls)", 8, function(state)
+createToggle(pages.Personal, "🕶  Noclip (walk through walls)", 9, function(state)
 	if state then
 		RunService:BindToRenderStep("Noclip", Enum.RenderPriority.Character.Value + 1, function()
 			local char = player.Character
@@ -990,7 +1012,7 @@ createToggle(pages.Personal, "🕶  Noclip (walk through walls)", 8, function(st
 	end
 end)
 
-createSection(pages.Personal, "🛡  Survival", 5)
+createSection(pages.Personal, "🛡  Survival", 10)
 
 -- God Mode — 3 methods
 local godConn = nil
@@ -1010,7 +1032,7 @@ local function applyGodMethod(hum)
 	end
 end
 
-createToggle(pages.Personal, "🛡  God Mode (invincible)", 6, function(state)
+createToggle(pages.Personal, "🛡  God Mode (invincible)", 11, function(state)
 	if godConn then godConn:Disconnect(); godConn = nil end
 	if state then
 		godConn = RunService.Heartbeat:Connect(function()
@@ -1035,14 +1057,20 @@ createToggle(pages.Personal, "🛡  God Mode (invincible)", 6, function(state)
 	end
 end)
 
-createBtn(pages.Personal, "🔧  God method: " .. godMethod .. "/3", currentTheme.Button, 7, function()
+local godMethodBtn = createBtn(pages.Personal, "🔧  God method: 1/3", currentTheme.Button, 12, function()
 	godMethod = (godMethod % 3) + 1
 	showNotification("🛡  God method: " .. godMethod, 2)
+	-- Update button label
+	for _, c in ipairs(godMethodBtn:GetChildren()) do
+		if c:IsA("TextLabel") or c:IsA("TextButton") then
+			c.Text = "🔧  God method: " .. godMethod .. "/3"
+		end
+	end
 end)
 
 -- Infinite Jump
 local jumpConn = nil
-createToggle(pages.Personal, "🦘  Infinite Jump", 9, function(state)
+createToggle(pages.Personal, "🦘  Infinite Jump", 13, function(state)
 	if state then
 		jumpConn = UIS.JumpRequest:Connect(function()
 			local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
@@ -1053,7 +1081,7 @@ createToggle(pages.Personal, "🦘  Infinite Jump", 9, function(state)
 	end
 end)
 
-createSection(pages.Personal, "🎯  Combat", 11)
+createSection(pages.Personal, "🎯  Combat", 14)
 
 -- ================================================
 
@@ -1383,7 +1411,7 @@ player.CharacterAdded:Connect(function(char)
 	applyScale(currentScale * 100)
 end)
 
-createSlider(pages.Personal, "📐  Character Size", 50, 200, 100, 9, function(val)
+createSlider(pages.Personal, "📐  Character Size", 50, 200, 100, 109, function(val)
 	applyScale(val)
 end)
 
@@ -1719,7 +1747,7 @@ end)
 
 createSection(pages.Settings, "ℹ  Info", 10)
 local infoLbl = Instance.new("TextLabel", pages.Settings)
-infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v2.6  •  " .. player.Name
+infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v3.0  •  " .. player.Name
 infoLbl.Size = UDim2.new(1, 0, 0, 60)
 infoLbl.BackgroundTransparency = 1
 infoLbl.TextColor3 = currentTheme.SubText
@@ -1975,12 +2003,12 @@ local function stopNuke()
 end
 
 -- Toggle Nuke on the Personal page
-createSection(pages.Personal, "💥  Chaos & Fun", 9)
-createToggle(pages.Personal, "🚀  NUKE MODE  (propulsion + explosion)", 10, function(state)
+createSection(pages.Personal, "💥  Chaos & Fun", 200)
+createToggle(pages.Personal, "🚀  NUKE MODE  (propulsion + explosion)", 201, function(state)
 	nukeEnabled = state
 	if state then startNuke() else stopNuke() end
 end)
-createBtn(pages.Personal, "💣  Explode in Place", currentTheme.Danger, 11, function()
+createBtn(pages.Personal, "💣  Explode in Place", currentTheme.Danger, 202, function()
 	local char = player.Character
 	local hrp  = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
@@ -2006,7 +2034,7 @@ createBtn(pages.Personal, "💣  Explode in Place", currentTheme.Danger, 11, fun
 		end)
 	end
 end)
-createBtn(pages.Personal, "🔄  Reset Character", currentTheme.Button, 12, function()
+createBtn(pages.Personal, "🔄  Reset Character", currentTheme.Button, 203, function()
 	if player.Character then
 		local hum = player.Character:FindFirstChildOfClass("Humanoid")
 		if hum then hum.Health = 0 end
@@ -2486,7 +2514,7 @@ createSection(pages.Other, "ℹ  Version", 98)
 local verLabel = Instance.new("TextLabel", pages.Other)
 verLabel.Size = UDim2.new(1, 0, 0, 40)
 verLabel.BackgroundTransparency = 1
-verLabel.Text = "🌐 вκ乙 HUB  v2.6\n👉𝐁 Press [B] to open/close"
+verLabel.Text = "🌐 вκ乙 HUB  v3.0\n👉𝐁 Press [B] to open/close"
 verLabel.TextColor3 = currentTheme.SubText
 verLabel.Font = Enum.Font.Gotham
 verLabel.TextSize = 11
