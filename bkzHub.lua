@@ -146,7 +146,7 @@ title.TextSize = 15
 title.TextXAlignment = Enum.TextXAlignment.Left
 
 local subtitle = Instance.new("TextLabel", header)
-subtitle.Text = "v3.2  •  " .. player.Name
+subtitle.Text = "v3.3  •  " .. player.Name
 subtitle.Size = UDim2.new(1, -50, 0, 14)
 subtitle.Position = UDim2.new(0, 15, 0, 30)
 subtitle.BackgroundTransparency = 1
@@ -1750,7 +1750,7 @@ end)
 
 createSection(pages.Settings, "ℹ  Info", 10)
 local infoLbl = Instance.new("TextLabel", pages.Settings)
-infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v3.2  •  " .. player.Name
+infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v3.3  •  " .. player.Name
 infoLbl.Size = UDim2.new(1, 0, 0, 60)
 infoLbl.BackgroundTransparency = 1
 infoLbl.TextColor3 = currentTheme.SubText
@@ -2157,7 +2157,7 @@ local function buildESPFor(p)
 
 	-- NAME (compact, small)
 	if espState.names then
-		local bb = mkBB(hrp, "ESP_Name", 100, 16, 3.2, 500)
+		local bb = mkBB(hrp, "ESP_Name", 100, 16, 3.3, 500)
 		local lbl = mkLbl(bb, p.Name, 9, color)
 		lbl.Text = (isAlly and "[A] " or "[E] ") .. p.Name
 		table.insert(objs, bb)
@@ -2517,7 +2517,7 @@ createSection(pages.Other, "ℹ  Version", 98)
 local verLabel = Instance.new("TextLabel", pages.Other)
 verLabel.Size = UDim2.new(1, 0, 0, 40)
 verLabel.BackgroundTransparency = 1
-verLabel.Text = "🌐 вκ乙 HUB  v3.2\n👉𝐁 Press [B] to open/close"
+verLabel.Text = "🌐 вκ乙 HUB  v3.3\n👉𝐁 Press [B] to open/close"
 verLabel.TextColor3 = currentTheme.SubText
 verLabel.Font = Enum.Font.Gotham
 verLabel.TextSize = 11
