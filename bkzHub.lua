@@ -441,6 +441,58 @@ local function createSlider(parent, text, min, max, default, order, func)
 	return frame
 end
 
+local function createNumberInput(parent, text, default, order, func)
+	local frame = Instance.new("Frame", parent)
+	frame.Size = UDim2.new(1, 0, 0, 40)
+	frame.BackgroundColor3 = currentTheme.Button
+	frame.BorderSizePixel = 0
+	frame.LayoutOrder = order or 1
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+	local lbl = Instance.new("TextLabel", frame)
+	lbl.Text = text
+	lbl.Size = UDim2.new(1, -90, 1, 0)
+	lbl.Position = UDim2.new(0, 12, 0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.TextColor3 = currentTheme.Text
+	lbl.Font = Enum.Font.GothamSemibold
+	lbl.TextSize = 12
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local box = Instance.new("TextBox", frame)
+	box.Size = UDim2.new(0, 72, 0, 26)
+	box.Position = UDim2.new(1, -82, 0.5, -13)
+	box.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+	box.BorderSizePixel = 0
+	box.TextColor3 = currentTheme.Accent
+	box.Font = Enum.Font.GothamBold
+	box.TextSize = 13
+	box.Text = tostring(default)
+	box.ClearTextOnFocus = false
+	box.PlaceholderText = tostring(default)
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+
+	local current = default
+
+	box.Changed:Connect(function(prop)
+		if prop == "Text" then
+			box.Text = box.Text:gsub("[^%d%-%.]+", "")
+		end
+	end)
+
+	box.FocusLost:Connect(function()
+		local n = tonumber(box.Text)
+		if n then
+			current = n
+			func(n)
+		else
+			box.Text = tostring(current)
+		end
+	end)
+
+	return frame
+end
+
 -- ================================================
 
 -- ================================================
