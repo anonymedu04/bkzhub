@@ -1,5 +1,5 @@
 -- ================================================
---  вκ乙 HUB V8 | By вκ乙 | Keys B for open !
+--  bkz HUB v3.4 | By bkz | Keys B for open !
 -- ================================================
 task.wait(1)
 
@@ -104,6 +104,7 @@ local gui = Instance.new("ScreenGui", playerGui)
 gui.Name = "AdminMenu"
 gui.Enabled = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 999
 gui.ResetOnSpawn = false
 
 -- Main window
@@ -136,7 +137,7 @@ headerFix.BackgroundColor3 = currentTheme.Panel
 headerFix.BorderSizePixel = 0
 
 local title = Instance.new("TextLabel", header)
-title.Text = "🌐 вκ乙 HUB"
+title.Text = "🌐 bkz HUB"
 title.Size = UDim2.new(1, -50, 1, 0)
 title.Position = UDim2.new(0, 15, 0, 0)
 title.BackgroundTransparency = 1
@@ -146,7 +147,7 @@ title.TextSize = 15
 title.TextXAlignment = Enum.TextXAlignment.Left
 
 local subtitle = Instance.new("TextLabel", header)
-subtitle.Text = "v3.3  •  " .. player.Name
+subtitle.Text = "v3.4  •  " .. player.Name
 subtitle.Size = UDim2.new(1, -50, 0, 14)
 subtitle.Position = UDim2.new(0, 15, 0, 30)
 subtitle.BackgroundTransparency = 1
@@ -805,7 +806,7 @@ selectPlayer = function(p)
 	_origSelectPlayer(p)
 	infoName.Text = "👤  " .. p.Name .. "  (ID: " .. p.UserId .. ")"
 	local teamName = p.Team and p.Team.Name or "None"
-	infoStats.Text = "🏷  " .. (p.DisplayName ~= p.Name and p.DisplayName or p.Name) .. "   🚩 Team: " .. teamName
+	infoStats.Text = "🏷  " .. p.Name .. "   🚩 Team: " .. teamName
 	local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid")
 	if hum then
 		infoHP.Text = "❤  HP: " .. math.floor(hum.Health) .. " / " .. math.floor(hum.MaxHealth)
@@ -909,13 +910,13 @@ createToggle(pages.Personal, "⚡  Goku TP (F + Mouse)", 1, function(state)
 	gokuMode = state
 end)
 
-createSlider(pages.Personal, "🏃  Walk Speed", 16, 250, 16, 2, function(val)
+createNumberInput(pages.Personal, "🏃  Walk Speed", 16, 2, function(val)
 	savedWalkSpeed = val
 	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if hum then hum.WalkSpeed = val end
 end)
 
-createSlider(pages.Personal, "🦘  Jump Height", 7, 500, 50, 3, function(val)
+createNumberInput(pages.Personal, "🦘  Jump Height", 50, 3, function(val)
 	savedJumpPower = val
 	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 	if hum then
@@ -987,7 +988,7 @@ createToggle(pages.Personal, "🦅  Fly  (WASD + Space/Ctrl)", 6, function(state
 	if state then enableFly() else disableFly() end
 end)
 
-createSlider(pages.Personal, "🦅  Fly Speed", 10, 5000, 40, 7, function(val)
+createNumberInput(pages.Personal, "🦅  Fly Speed", 40, 7, function(val)
 	flySpeed = val
 end)
 
@@ -1277,7 +1278,7 @@ createSlider(pages.Personal, "🎚  Smooth (aim speed)", 1, 30, 8, 102, function
 end)
 
 -- Slider FOV
-createSlider(pages.Personal, "🔵  FOV (radius pixels)", 50, 600, 250, 103, function(val)
+createNumberInput(pages.Personal, "🔵  FOV (radius pixels)", 250, 103, function(val)
 	aimFOV = val
 end)
 
@@ -1414,7 +1415,7 @@ player.CharacterAdded:Connect(function(char)
 	applyScale(currentScale * 100)
 end)
 
-createSlider(pages.Personal, "📐  Character Size", 50, 200, 100, 109, function(val)
+createNumberInput(pages.Personal, "📐  Character Size", 100, 109, function(val)
 	applyScale(val)
 end)
 
@@ -1588,7 +1589,7 @@ end)
 
 createSection(pages.World, "⏩  Time", 9)
 
-createSlider(pages.World, "☀  Time of Day", 0, 24, 14, 10, function(val)
+createNumberInput(pages.World, "☀  Time of Day", 14, 10, function(val)
 	Lighting.ClockTime = val
 end)
 
@@ -1603,7 +1604,7 @@ end)
 
 createSection(pages.World, "⚙  Physics", 11)
 
-createSlider(pages.World, "🌍  Gravity", 0, 300, 196, 12, function(val)
+createNumberInput(pages.World, "🌍  Gravity", 196, 12, function(val)
 	workspace.Gravity = val
 end)
 createBtn(pages.World, "↩  Reset Gravity", currentTheme.Button, 13, function()
@@ -1750,7 +1751,7 @@ end)
 
 createSection(pages.Settings, "ℹ  Info", 10)
 local infoLbl = Instance.new("TextLabel", pages.Settings)
-infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 вκ乙 HUB v3.3  •  " .. player.Name
+infoLbl.Text = "🎮  [B]  → Open / Close\n🖱  Drag anywhere → Move\n🌐 bkz HUB v3.4  •  " .. player.Name
 infoLbl.Size = UDim2.new(1, 0, 0, 60)
 infoLbl.BackgroundTransparency = 1
 infoLbl.TextColor3 = currentTheme.SubText
@@ -2157,7 +2158,7 @@ local function buildESPFor(p)
 
 	-- NAME (compact, small)
 	if espState.names then
-		local bb = mkBB(hrp, "ESP_Name", 100, 16, 3.3, 500)
+		local bb = mkBB(hrp, "ESP_Name", 100, 16, 3.2, 500)
 		local lbl = mkLbl(bb, p.Name, 9, color)
 		lbl.Text = (isAlly and "[A] " or "[E] ") .. p.Name
 		table.insert(objs, bb)
@@ -2476,7 +2477,7 @@ createColorDropdown(pages.ESP, "🔵  Ally Color", 21,
 createSection(pages.Other, "👑  Credits", 0)
 
 local credits = {
-	{"👑  Owner","вκ乙"},
+	{"👑  Owner","bkz"},
 	{"🤝  Contributor","All people use menu thx you !"},
 }
 
@@ -2517,7 +2518,7 @@ createSection(pages.Other, "ℹ  Version", 98)
 local verLabel = Instance.new("TextLabel", pages.Other)
 verLabel.Size = UDim2.new(1, 0, 0, 40)
 verLabel.BackgroundTransparency = 1
-verLabel.Text = "🌐 вκ乙 HUB  v3.3\n👉𝐁 Press [B] to open/close"
+verLabel.Text = "🌐 bkz HUB  v3.4\n👉𝐁 Press [B] to open/close"
 verLabel.TextColor3 = currentTheme.SubText
 verLabel.Font = Enum.Font.Gotham
 verLabel.TextSize = 11
