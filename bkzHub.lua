@@ -736,13 +736,13 @@ local function updateDD(filter)
 	for _, c in pairs(ddList:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
 	local results = {}
 	for _, p in pairs(Players:GetPlayers()) do
-		if filter == "" or p.Name:lower():find(filter, 1, true) then
+		if filter == "" or p.Name:lower():find(filter, 1, true) or p.DisplayName:lower():find(filter, 1, true) then
 			table.insert(results, p)
 		end
 	end
 	for _, p in ipairs(results) do
 		local pb = Instance.new("TextButton", ddList)
-		pb.Text = "  " .. p.Name
+		pb.Text = "  " .. p.Name .. (p.DisplayName ~= p.Name and " (" .. p.DisplayName .. ")" or "")
 		pb.Size = UDim2.new(1, 0, 0, 30)
 		pb.BackgroundColor3 = Color3.fromRGB(0,0,0)
 		pb.BackgroundTransparency = 1
@@ -858,7 +858,7 @@ selectPlayer = function(p)
 	_origSelectPlayer(p)
 	infoName.Text = "👤  " .. p.Name .. "  (ID: " .. p.UserId .. ")"
 	local teamName = p.Team and p.Team.Name or "None"
-	infoStats.Text = "🏷  " .. p.Name .. "   🚩 Team: " .. teamName
+	infoStats.Text = "🏷  " .. p.Name .. (p.DisplayName ~= p.Name and " (" .. p.DisplayName .. ")" or "") .. "   🚩 Team: " .. teamName
 	local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid")
 	if hum then
 		infoHP.Text = "❤  HP: " .. math.floor(hum.Health) .. " / " .. math.floor(hum.MaxHealth)
